@@ -547,31 +547,6 @@
     }
 
     /* --- ESTILOS ESPECÍFICOS DO PIX --- */
-    .preset-buttons-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      margin-bottom: 15px;
-    }
-
-    .preset-btn {
-      background-color: var(--bg-dark);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 10px 4px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .preset-btn:hover, .preset-btn.active {
-      background-color: var(--primary);
-      color: #000;
-      border-color: var(--primary);
-    }
-
     .pix-box {
       background-color: var(--bg-dark);
       border: 1px solid var(--border-color);
@@ -699,7 +674,6 @@
       aside { display: none; }
       .hero-banner-img { height: 150px; }
       .games-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-      .preset-buttons-grid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -899,14 +873,7 @@
         <h3>Adicionar Fundos via PIX</h3>
 
         <div id="pixFieldsContainer" style="display: flex; flex-direction: column;">
-          <div class="preset-buttons-grid">
-            <button type="button" class="preset-btn" onclick="setPresetValue(20)">R$ 20</button>
-            <button type="button" class="preset-btn" onclick="setPresetValue(40)">R$ 40</button>
-            <button type="button" class="preset-btn" onclick="setPresetValue(50)">R$ 50</button>
-            <button type="button" class="preset-btn active" onclick="setPresetValue(100)">R$ 100</button>
-            <button type="button" class="preset-btn" onclick="setPresetValue(200)">R$ 200</button>
-          </div>
-
+          
           <div class="form-group-pix">
             <label>Valor do Depósito (Mínimo R$ 20)</label>
             <input type="number" id="depositAmount" class="modal-input" value="100" min="20" step="1" oninput="validateAmountInput(this)">
@@ -931,7 +898,7 @@
 
           <div class="form-group-pix">
             <label>Código End-to-End (E2E) do Comprovante</label>
-            <input type="text" id="e2eInput" class="modal-input" placeholder="Ex: E123456782026... (ID da transação)" style="margin-bottom: 12px; font-size: 0.95rem; text-align: left; padding: 10px;">
+            <input type="text" id="e2eInput" class="modal-input" placeholder="Ex: E123456782026... (32 caracteres)" style="margin-bottom: 12px; font-size: 0.95rem; text-align: left; padding: 10px;">
           </div>
 
           <div class="form-group-pix">
@@ -1208,19 +1175,33 @@
       window.location.reload();
     }
 
-    // --- LÓGICA DE DEPÓSITO PIX 100% LOCAL ---
+    // --- LÓGICA DE DETECÇÃO E VALIDAÇÃO DE CÓDIGO E2E PIX ---
 
-    function setPresetValue(val) {
-      document.getElementById('depositAmount').value = val;
-      updateDisplayAmount(val);
+    function isE2EVeridico(e2eId) {
+      if (!e2eId || typeof e2eId !== 'string') return false;
+      const clean = e2eId.trim().toUpperCase();
 
-      const presetBtns = document.querySelectorAll('.preset-btn');
-      presetBtns.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.innerText.includes(val)) {
-          btn.classList.add('active');
-        }
-      });
+      // Estrutura Bacen: 'E' + 8 dígitos ISPB + 12 dígitos Data/Hora + 11 caracteres Alfanuméricos (32 caracteres)
+      const regexPixE2E = /^E\d{8}\d{12}[A-Z0-9]{11}$/;
+      if (!regexPixE2E.test(clean)) return false;
+
+      const ano = parseInt(clean.substring(9, 13));
+      if (ano < 2020 || ano > 2030) return false;
+
+      return true;
+    }
+
+    function getUsedE2ECodes() {
+      const data = localStorage.getItem('e2e_codigos_usados');
+      return data ? JSON.parse(data) : [
+        "E00000000202608031900A1B2C3D4E5F" // Exemplo de código já utilizado/queimado
+      ];
+    }
+
+    function saveUsedE2ECode(code) {
+      const used = getUsedE2ECodes();
+      used.push(code);
+      localStorage.setItem('e2e_codigos_usados', JSON.stringify(used));
     }
 
     function validateAmountInput(input) {
@@ -1249,7 +1230,7 @@
 
     function confirmPixDeposit() {
       const e2eInput = document.getElementById('e2eInput');
-      const e2eVal = e2eInput.value.trim();
+      const e2eVal = e2eInput.value.trim().toUpperCase();
       const amountVal = parseFloat(document.getElementById('depositAmount').value);
       
       const alertSuccess = document.getElementById('pixAlertSuccess');
@@ -1271,7 +1252,23 @@
         return;
       }
 
-      // Processamento 100% local e seguro no navegador
+      // 1. Checa se o código é verídico (Estrutura do Banco Central)
+      if (!isE2EVeridico(e2eVal)) {
+        alertError.style.display = 'block';
+        alertError.innerHTML = 'Código não verídico. Informe um código E2E válido do Pix (ex: E123456782026...).';
+        return;
+      }
+
+      // 2. Checa se o código já foi utilizado
+      const usedCodes = getUsedE2ECodes();
+      if (usedCodes.includes(e2eVal)) {
+        alertError.style.display = 'block';
+        alertError.innerHTML = 'Código indisponível.';
+        return;
+      }
+
+      // 3. Sucesso: Registrar como usado e adicionar saldo
+      saveUsedE2ECode(e2eVal);
       currentBalance += amountVal;
       updateBalanceUI();
 
