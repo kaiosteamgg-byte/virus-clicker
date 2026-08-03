@@ -1274,7 +1274,7 @@
       const nameToSend = activeUser.name || activeUser.nome || "João Silva";
 
       try {
-        const response = await fetch('http://localhost:3000/api/deposit', {
+        const response = await fetch('https://willbetserver.onrender.com', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
