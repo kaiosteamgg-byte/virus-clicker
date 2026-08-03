@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fortune Dragon</title>
+  
+  <!-- PROTEÇÃO ANTI-INSPEÇÃO E F12 -->
+  <script>
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.ctrlKey && ['U', 'u'].includes(e.key)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    });
+
+    (function () {
+      const threshold = 160;
+      const checkDevTools = function () {
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        if (widthThreshold || heightThreshold) {
+          document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0b0b0b; color: #ff3333; font-family: sans-serif; font-size: 22px; text-align: center; padding: 20px;">
+              Acesso Restrito: Ferramentas de Desenvolvedor detectadas!
+            </div>`;
+        }
+      };
+      window.addEventListener('resize', checkDevTools);
+      setInterval(checkDevTools, 1000);
+    })();
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka One', cursive, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .game-screen {
+      width: 100vw;
+      max-width: 414px;
+      height: 100vh;
+      max-height: 896px;
+      background: url('assets/dragon/fundo-dragao.png') no-repeat center center;
+      background-size: 100% 100%; 
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* BOTÃO VOLTAR */
+    .btn-back-lobby {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #ffcb47;
+      color: #ffeb82;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      z-index: 100;
+      text-decoration: none;
+    }
+
+    /* TAMBORES DA ROLETA (3-3-3) */
+    .slot-board {
+      position: absolute;
+      top: 6%;
+      left: 4%;
+      width: 92%;
+      height: 44%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      padding: 8px;
+    }
+
+    .reel-col {
+      width: 31%;
+      height: 94%;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .reel-col.middle {
+      width: 34%;
+      height: 94%;
+    }
+
+    .reel-strip {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      will-change: transform;
+      transform: translate3d(0, 0, 0);
+      align-items: center;
+    }
+
+    .symbol-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 4px;
+    }
+
+    .symbol-box img {
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+      margin: auto;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.8));
+    }
+
+    /* FUNDOS ARREDONDADOS COMPACTOS PARA SALDO E APOSTA */
+    .balance-overlay {
+      position: absolute;
+      top: 76.6%;
+      left: 10%;
+      width: auto;
+      height: 34px;
+      background: rgba(18, 8, 12, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.7rem;
+      color: #ffeb82;
+      font-weight: bold;
+      z-index: 20;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+      white-space: nowrap;
+      padding: 0 12px;
+    }
+
+    .bet-overlay {
+      position: absolute;
+      top: 76.6%;
+      right: 15%;
+      width: auto;
+      height: 34px;
+      background: rgba(18, 8, 12, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #ffeb82;
+      font-weight: bold;
+      z-index: 20;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+      white-space: nowrap;
+      padding: 0 12px;
+    }
+
+    /* ANIMAÇÃO DE ONDA SÓ NO BOTÃO DO MEIO */
+    @keyframes waveDown {
+      0% {
+        top: -100%;
+      }
+      100% {
+        top: 100%;
+      }
+    }
+
+    .spin-click-area:active::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.6), rgba(255,255,255,0));
+      animation: waveDown 0.25s ease-in-out forwards;
+      pointer-events: none;
+    }
+
+    /* BOTÕES INVISÍVEIS (TRANSPARENTES) */
+    .btn-turbo-overlay {
+      position: absolute;
+      bottom: 10.0%;
+      left: 3%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .btn-minus-overlay {
+      position: absolute;
+      bottom: 10.0%;
+      left: 20%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .spin-click-area {
+      position: absolute;
+      bottom: 7.4%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .spin-click-area.clicked {
+      transform: translateX(-50%) scale(0.92);
+    }
+
+    .btn-plus-overlay {
+      position: absolute;
+      bottom: 10.0%;
+      right: 20%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .btn-auto-overlay {
+      position: absolute;
+      bottom: 10.0%;
+      right: 3%;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    /* TELA DE GANHO (COM BIG WIN MAIOR E NÚMERO MAIOR/MAIS ABAIXO) */
+    .win-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: url('assets/dragon/bigwin-dragon.png') no-repeat center center;
+      background-size: 100% 100%;
+      display: none; 
+      z-index: 150;
+      cursor: pointer;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .win-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: absolute;
+      top: 35%;
+      width: 100%;
+    }
+
+    .win-title {
+      font-size: 4.5rem;
+      font-style: italic;
+      color: #1cc5ff;
+      text-shadow: 2px 2px 0px #003366, 0 0 15px rgba(28, 197, 255, 0.8);
+      margin-bottom: 0px;
+      letter-spacing: 2px;
+    }
+
+    .win-val {
+      font-size: 5.2rem;
+      color: #ffea00;
+      font-weight: bold;
+      text-shadow: 0 3px 0 #b35900, 0 5px 0 #803300, 0 8px 12px rgba(0,0,0,0.9);
+      letter-spacing: 1px;
+      margin-top: 20px;
+    }
+
+    /* MODAL DE AUTO SPIN */
+    .auto-modal {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(26, 22, 37, 0.96);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      display: none;
+      z-index: 160;
+      padding: 20px 20px 30px 20px;
+      box-shadow: 0 -5px 25px rgba(0,0,0,0.8);
+      border-top: 1px solid #4a3b6c;
+    }
+
+    .auto-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 18px;
+    }
+
+    .auto-close {
+      cursor: pointer;
+      font-size: 1.4rem;
+      color: #aaa;
+    }
+
+    .auto-label {
+      font-size: 0.85rem;
+      color: #bfa1db;
+      margin-bottom: 10px;
+    }
+
+    .auto-options {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 22px;
+    }
+
+    .auto-opt {
+      flex: 1;
+      background: #2c243b;
+      border: 1px solid #4a3b6c;
+      color: #bfa1db;
+      padding: 10px 0;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: center;
+      outline: none;
+    }
+
+    .auto-opt.active {
+      background: #d4af37;
+      color: #1a1625;
+      border-color: #ffd700;
+      font-weight: bold;
+    }
+
+    .auto-start-btn {
+      width: 100%;
+      background: linear-gradient(to bottom, #ffe875, #d4af37);
+      color: #3b2a00;
+      border: none;
+      padding: 12px;
+      border-radius: 25px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-screen">
+    <a href="index.html" class="btn-back-lobby">← Voltar</a>
+
+    <!-- TAMBORES 3-3-3 -->
+    <div class="slot-board" id="slotBoard">
+      <div class="reel-col" data-rows="3"><div class="reel-strip" id="strip0"></div></div>
+      <div class="reel-col middle" data-rows="3"><div class="reel-strip" id="strip1"></div></div>
+      <div class="reel-col" data-rows="3"><div class="reel-strip" id="strip2"></div></div>
+    </div>
+
+    <!-- SALDO E APOSTA COM FUNDO ARREDONDADO COMPACTO -->
+    <div class="balance-overlay" id="balanceVal">100.000.000,00</div>
+    <div class="bet-overlay" id="betVal">5.00</div>
+
+    <!-- BOTÕES INVISÍVEIS -->
+    <div class="btn-turbo-overlay" id="turboBtn" onclick="toggleTurbo()" title="Turbo"></div>
+    <div class="btn-minus-overlay" onclick="adjustBet(-1)" title="Diminuir Aposta"></div>
+    <div class="spin-click-area" id="spinBtn" onclick="handleSpinClick()" title="Girar"></div>
+    <div class="btn-plus-overlay" onclick="adjustBet(1)" title="Aumentar Aposta"></div>
+    <div class="btn-auto-overlay" onclick="handleAutoClick()" title="Auto"></div>
+
+    <!-- MODAL DE AUTO SPIN -->
+    <div class="auto-modal" id="autoModal">
+      <div class="auto-header">
+        <span>Auto Spin</span>
+        <span class="auto-close" onclick="closeAutoModal()">×</span>
+      </div>
+      <div class="auto-body">
+        <p class="auto-label">Number of Auto Spins</p>
+        <div class="auto-options">
+          <button class="auto-opt active" onclick="selectAutoCount(10, this)">10</button>
+          <button class="auto-opt" onclick="selectAutoCount(30, this)">30</button>
+          <button class="auto-opt" onclick="selectAutoCount(50, this)">50</button>
+          <button class="auto-opt" onclick="selectAutoCount(80, this)">80</button>
+          <button class="auto-opt" onclick="selectAutoCount(1000, this)">1000</button>
+        </div>
+        <button class="auto-start-btn" onclick="startAutoSpins()">Start</button>
+      </div>
+    </div>
+
+    <!-- TELA DE GANHO -->
+    <div class="win-modal" id="winModal" onclick="closeWinModal()">
+      <div class="win-content">
+        <div class="win-title" id="winModalTitle">Big Win</div>
+        <div class="win-val" id="winModalAmount">0,00</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SYMBOLS = [
+      { img: 'assets/dragon/dragao-wild.png?v=2', val: 100 },
+      { img: 'assets/dragon/envelope-vermelho.png?v=2', val: 25 },
+      { img: 'assets/dragon/fogos-de-artificio.png?v=2', val: 10 },
+      { img: 'assets/dragon/lanterna-vermelha.png?v=2', val: 50 },
+      { img: 'assets/dragon/lingote-de-ouro.png?v=2', val: 150 },
+      { img: 'assets/dragon/moedas-de-ouro.png?v=2', val: 5 },
+      { img: 'assets/dragon/no-chines.png?v=2', val: 20 }
+    ];
+
+    // Chave padronizada do site para salvar e ler saldo
+    const SITE_BALANCE_KEY = 'user_balance';
+
+    // Lê o saldo do localStorage do site ou do jogo (Fallback: 100.000.000,00)
+    let balance = parseFloat(localStorage.getItem(SITE_BALANCE_KEY)) || 
+                  parseFloat(localStorage.getItem('dragon_balance_100m')) || 
+                  100000000.00;
+
+    let bet = 5.00;
+    let isSpinning = false;
+    let rowHeights = [0, 0, 0];
+    let spinCount = 0;
+    let totalWonSoFar = parseFloat(localStorage.getItem('dragon_total_won')) || 0;
+    let turboMode = false;
+    
+    let autoSpinsRemaining = 0;
+    let isAutoRunning = false;
+    let chosenAutoCount = 10;
+
+    function calcHeights() {
+      const cols = document.querySelectorAll('.reel-col');
+      cols.forEach((col, idx) => {
+        const rows = parseInt(col.getAttribute('data-rows'));
+        rowHeights[idx] = col.clientHeight / rows;
+      });
+    }
+
+    function getRandomSymbol() {
+      return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    }
+
+    function createBox(symbol, height) {
+      const box = document.createElement('div');
+      box.className = 'symbol-box';
+      box.style.height = `${height}px`;
+      box.innerHTML = `<img src="${symbol.img}" alt="Símbolo" onerror="this.style.display='none'; this.parentElement.innerText='🐉';">`;
+      return box;
+    }
+
+    function initGame() {
+      calcHeights();
+      for (let c = 0; c < 3; c++) {
+        const strip = document.getElementById(`strip${c}`);
+        strip.style.transition = 'none';
+        strip.style.transform = 'translate3d(0, 0px, 0)';
+        strip.innerHTML = '';
+        
+        const rows = 3;
+        for (let r = 0; r < rows; r++) {
+          strip.appendChild(createBox(getRandomSymbol(), rowHeights[c]));
+        }
+      }
+      updateDisplays();
+    }
+
+    window.addEventListener('load', initGame);
+    window.addEventListener('resize', () => { if (!isSpinning) initGame(); });
+
+    // ATUALIZA INTERFACE, LOCALSTORAGE E COMUNICAÇÃO COM O SITE PAI
+    function updateDisplays() {
+      document.getElementById('balanceVal').innerText = balance.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      document.getElementById('betVal').innerText = bet.toFixed(2);
+      
+      // Salva no localStorage principal do site e do jogo
+      localStorage.setItem(SITE_BALANCE_KEY, balance);
+      localStorage.setItem('dragon_balance_100m', balance);
+      localStorage.setItem('dragon_total_won', totalWonSoFar);
+
+      // Notifica o site principal caso o jogo esteja rodando dentro de um iframe
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'UPDATE_GAME_BALANCE',
+          balance: balance
+        }, '*');
+      }
+    }
+
+    // ESCUTA ALTERAÇÕES DE SALDO FEITAS POR OUTRAS PÁGINAS DO SITE (localStorage)
+    window.addEventListener('storage', function(e) {
+      if (e.key === SITE_BALANCE_KEY || e.key === 'dragon_balance_100m') {
+        const newBal = parseFloat(e.newValue);
+        if (!isNaN(newBal)) {
+          balance = newBal;
+          document.getElementById('balanceVal').innerText = balance.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+      }
+    });
+
+    // ESCUTA MENSAGENS DIRETAS DO SITE PAI (Se estiver rodando em iframe)
+    window.addEventListener('message', function(event) {
+      if (event.data && (event.data.type === 'SET_INITIAL_BALANCE' || event.data.type === 'UPDATE_BALANCE')) {
+        const newBal = parseFloat(event.data.balance);
+        if (!isNaN(newBal)) {
+          balance = newBal;
+          updateDisplays();
+        }
+      }
+    });
+
+    function adjustBet(delta) {
+      if (isSpinning || isAutoRunning) return;
+      if (spinCount > 17) return; 
+      if (bet + delta >= 1.00) {
+        bet += delta;
+        updateDisplays();
+      }
+    }
+
+    function toggleTurbo() {
+      turboMode = !turboMode;
+    }
+
+    function handleAutoClick() {
+      if (isSpinning || isAutoRunning) return;
+      document.getElementById('autoModal').style.display = 'block';
+    }
+
+    function closeAutoModal() {
+      document.getElementById('autoModal').style.display = 'none';
+    }
+
+    function selectAutoCount(count, el) {
+      document.querySelectorAll('.auto-opt').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      chosenAutoCount = count;
+    }
+
+    function startAutoSpins() {
+      closeAutoModal();
+      autoSpinsRemaining = chosenAutoCount;
+      isAutoRunning = true;
+      runNextAutoSpin();
+    }
+
+    function runNextAutoSpin() {
+      if (autoSpinsRemaining <= 0 || balance < bet) {
+        isAutoRunning = false;
+        return;
+      }
+      executeSpinCore(() => {
+        autoSpinsRemaining--;
+        if (isAutoRunning && autoSpinsRemaining > 0) {
+          setTimeout(runNextAutoSpin, turboMode ? 300 : 700);
+        } else {
+          isAutoRunning = false;
+        }
+      });
+    }
+
+    function handleSpinClick() {
+      if (isSpinning || isAutoRunning) return;
+      executeSpinCore(null);
+    }
+
+    function executeSpinCore(callback) {
+      if (spinCount >= 17 && totalWonSoFar > 0) {
+        bet = parseFloat((totalWonSoFar * 0.95).toFixed(2));
+      }
+
+      if (bet < 1.00) bet = 1.00;
+
+      if (balance < bet) {
+        alert('Saldo insuficiente para a aposta automática!');
+        isAutoRunning = false;
+        if (callback) callback();
+        return;
+      }
+
+      balance -= bet;
+      spinCount++;
+      isSpinning = true;
+
+      const btn = document.getElementById('spinBtn');
+      btn.classList.add('clicked');
+      setTimeout(() => btn.classList.remove('clicked'), 300);
+
+      let isWin = false;
+      let winVal = 0;
+      let winTitleText = "Big Win";
+
+      if (spinCount === 4) {
+        isWin = true;
+        winTitleText = "Mega Win";
+        winVal = 15.00;
+      } else if (spinCount === 8) {
+        isWin = true;
+        winTitleText = "Super Win";
+        winVal = Math.floor(Math.random() * 10) + 20;
+      } else if (spinCount === 13) {
+        isWin = true;
+        winTitleText = "Super Mega Win";
+        winVal = Math.floor(Math.random() * 150) + 250;
+      } else if (spinCount === 17) {
+        isWin = true;
+        winTitleText = "Super Mega Win";
+        winVal = Math.floor(Math.random() * 100) + 150;
+      } else if (spinCount > 17 && (spinCount - 17) % 40 === 0) {
+        isWin = true;
+        winTitleText = "Big Win";
+        winVal = bet * 2;
+      }
+
+      if (isWin) {
+        totalWonSoFar += winVal;
+      }
+
+      updateDisplays();
+
+      const dummyCount = 14;
+
+      for (let c = 0; c < 3; c++) {
+        const strip = document.getElementById(`strip${c}`);
+        const rows = 3;
+        const h = rowHeights[c];
+
+        strip.style.transition = 'none';
+        strip.style.transform = 'translate3d(0, 0px, 0)';
+        strip.innerHTML = '';
+
+        for (let r = 0; r < rows; r++) strip.appendChild(createBox(getRandomSymbol(), h));
+        for (let i = 0; i < dummyCount; i++) strip.appendChild(createBox(getRandomSymbol(), h));
+        for (let r = 0; r < rows; r++) strip.appendChild(createBox(getRandomSymbol(), h));
+
+        const distanceToMove = -(dummyCount * h);
+        const duration = turboMode ? 0.2 : 0.6;
+
+        setTimeout(() => {
+          strip.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.8, 0.2, 1)`;
+          strip.style.transform = `translate3d(0, ${distanceToMove}px, 0)`;
+        }, c * (turboMode ? 30 : 70));
+      }
+
+      setTimeout(() => {
+        if (isWin) {
+          balance += winVal;
+          updateDisplays();
+          document.getElementById('winModalTitle').innerText = winTitleText;
+          document.getElementById('winModalAmount').innerText = winVal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+          document.getElementById('winModal').style.display = 'flex';
+        }
+        isSpinning = false;
+        if (callback) callback();
+      }, turboMode ? 300 : 750);
+    }
+
+    function closeWinModal() {
+      document.getElementById('winModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

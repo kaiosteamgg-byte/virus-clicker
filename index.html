@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WillBet - Cassino & Apostas Online</title>
+  <!-- Ícones via Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* --- TEMA PRETO AND CINZA (MODO MONOCHROMATIC LUXURY) --- */
+    :root {
+      --bg-dark: #09090b;        /* Preto profundo */
+      --bg-card: #121214;        /* Cinza muito escuro para os cards */
+      --bg-hover: #222226;       /* Cinza de hover */
+      --primary: #f4f4f5;        /* Branco gelo para elementos principais e botões */
+      --primary-hover: #e4e4e7;  /* Branco levemente mais escuro no hover */
+      --accent: #71717a;         /* Cinza intermediário para detalhes */
+      --text-main: #fafafa;      /* Texto principal quase branco */
+      --text-muted: #a1a1aa;     /* Texto secundário em cinza claro */
+      --border-color: #27272a;   /* Borda sutil em cinza escuro */
+      --sidebar-width: 240px;
+      --error-color: #ef4444;    /* Vermelho para alertas de fraude */
+      --success-color: #10b981;  /* Verde para sucesso */
+      --info-color: #3b82f6;     /* Azul para em processamento */
+      --warning-color: #eab308;  /* Amarelo para verificação */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- CABEÇALHO --- */
+    header {
+      height: 70px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .wallet-box {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .wallet-box span {
+      color: var(--primary);
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    @keyframes pulse-balance {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.15); filter: brightness(1.4); text-shadow: 0 0 10px var(--primary); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    .pulse-anim {
+      animation: pulse-balance 0.5s ease;
+    }
+
+    .btn-deposit {
+      background-color: var(--primary);
+      color: #000;
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-deposit:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-auth-header {
+      background-color: var(--bg-hover);
+      color: var(--text-main);
+      font-weight: 700;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-auth-header:hover {
+      background-color: var(--border-color);
+    }
+
+    /* --- ESTRUTURA PRINCIPAL --- */
+    .main-container {
+      display: flex;
+      flex: 1;
+    }
+
+    aside {
+      width: var(--sidebar-width);
+      background-color: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      padding: 20px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: width 0.3s;
+    }
+
+    .nav-section {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .nav-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      padding-left: 10px;
+      margin-bottom: 5px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background-color: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .nav-item.active i {
+      color: var(--primary);
+    }
+
+    main {
+      flex: 1;
+      padding: 25px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active-tab {
+      display: block;
+    }
+
+    /* --- CARROSSEL --- */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--border-color);
+    }
+
+    .carousel-slides {
+      display: flex;
+      width: 100%;
+      transition: transform 0.4s ease-in-out;
+    }
+
+    .hero-banner-img {
+      width: 100%;
+      min-width: 100%;
+      max-width: 100%;
+      flex: 0 0 100%;
+      height: 230px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(18, 18, 20, 0.85);
+      color: #fff;
+      border: 1px solid var(--border-color);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+
+    .carousel-arrow:hover {
+      background-color: var(--primary);
+      color: #000;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-arrow.left { left: 15px; }
+    .carousel-arrow.right { right: 15px; }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 15px;
+      right: 20px;
+      display: flex;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: background-color 0.2s, width 0.2s;
+    }
+
+    .dot.active {
+      background-color: var(--primary);
+      width: 22px;
+      border-radius: 10px;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+
+    .tab-btn {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background-color: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 18px;
+      margin-bottom: 35px;
+    }
+
+    .game-card {
+      background-color: var(--bg-card);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      aspect-ratio: 3/4;
+    }
+
+    .game-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.8);
+      border-color: var(--accent);
+    }
+
+    .game-card .card-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      transition: transform 0.3s;
+    }
+
+    .game-card:hover .card-bg {
+      transform: scale(1.08);
+    }
+
+    .bg-tiger { background-image: url('https://s2-techtudo.glbimg.com/gHUrnm92SB-DnqlpLZ5iC6KE57M=/0x0:650x446/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_08fbf48bc0524877943fe86e43087e7a/internal_photos/bs/2023/6/d/2vBXlwTAq5YtSIuRNkRg/fortune-tiger-divulgacao.jpg'); }
+    .bg-dragon { background-image: url('https://media.beto.com/photos/thumb/53100_fortune-dragon-pg-soft-game.jpg?_1735307443'); }
+    .bg-rabbit { background-image: url('https://media.beto.com/photos/thumb/43224_fortune-rabbit-game.jpg?_1727348012'); }
+    .bg-mines { background-image: url('https://mines.net.br/wp-content/uploads/2025/09/mines-logo-1.webp'); }
+    .bg-double { background: linear-gradient(135deg, #111827 0%, #dc2626 50%, #059669 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+
+    .badge-pop {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, #27272a, #18181b);
+      color: #fff;
+      border: 1px solid var(--border-color);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    /* --- MODAIS --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 25px;
+      border-radius: 16px;
+      width: 480px;
+      max-width: 100%;
+      text-align: center;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+      margin: auto;
+    }
+
+    .modal-header-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      background-color: var(--bg-dark);
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .modal-tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-tab-btn.active {
+      background-color: var(--primary);
+      color: #000;
+    }
+
+    .modal-box h3 {
+      margin-bottom: 15px;
+      color: var(--text-main);
+      font-size: 1.2rem;
+    }
+
+    .modal-input {
+      width: 100%;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: bold;
+      outline: none;
+    }
+
+    .modal-input:focus {
+      border-color: var(--primary);
+    }
+
+    /* --- ESTILOS DE RASTREAMENTO DE SAQUE --- */
+    .withdraw-history-box {
+      margin-top: 20px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 15px;
+      text-align: left;
+    }
+
+    .withdraw-history-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .withdraw-card {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .withdraw-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .withdraw-card-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .status-moving {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: var(--info-color);
+      border: 1px solid var(--info-color);
+    }
+
+    .status-antifraud {
+      background-color: rgba(234, 179, 8, 0.15);
+      color: var(--warning-color);
+      border: 1px solid var(--warning-color);
+    }
+
+    .status-completed {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
+
+    .withdraw-card-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* --- ESTILOS ESPECÍFICOS DO PIX / MERCADO PAGO --- */
+    .preset-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .preset-btn {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 4px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+      background-color: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    .qr-container {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-img {
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      background-color: #fff;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .qr-instructions {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .form-group-pix {
+      text-align: left;
+      margin-bottom: 12px;
+    }
+
+    .form-group-pix label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .alert-box {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: none;
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--success-color);
+      color: #34d399;
+    }
+
+    .alert-error {
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--error-color);
+      color: #f87171;
+    }
+
+    .pay-method-btn {
+      flex: 1;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .pay-method-btn.active {
+      background-color: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    .btn-modal-confirm {
+      width: 100%;
+      background-color: var(--primary);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-modal-confirm:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-modal-cancel {
+      width: 100%;
+      background-color: var(--bg-hover);
+      color: var(--text-main);
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      aside { display: none; }
+      .hero-banner-img { height: 150px; }
+      .games-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+      .preset-buttons-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="header-left">
+      <button class="menu-btn"><i data-lucide="menu"></i></button>
+      <a href="bet.html" class="logo">Will<span style="color: var(--text-muted);">Bet</span></a>
+    </div>
+    
+    <div class="header-right">
+      <div class="wallet-box">
+        <i data-lucide="wallet" style="width: 18px;"></i>
+        <span id="wallet-balance">R$ 1.250,00</span>
+      </div>
+      <button class="btn-deposit" onclick="openWalletModal()">
+        <i data-lucide="wallet-cards" style="width: 18px;"></i> Gerenciar Saldo
+      </button>
+      <div id="authHeaderArea">
+        <button class="btn-auth-header" onclick="openAuthModal()">Entrar</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-container">
+    
+    <!-- BARRA LATERAL -->
+    <aside>
+      <div class="nav-section">
+        <div class="nav-title">Menu Principal</div>
+        <a class="nav-item active" onclick="switchTab(event, 'tab-populares')"><i data-lucide="flame"></i> Populares</a>
+        <a class="nav-item" onclick="switchTab(event, 'tab-slots')"><i data-lucide="sparkles"></i> Slots Fortune</a>
+        <a class="nav-item" onclick="switchTab(event, 'tab-cassino')"><i data-lucide="gamepad-2"></i> Cassino</a>
+        <a class="nav-item" onclick="switchTab(event, 'tab-esportes')"><i data-lucide="trophy"></i> Esportes</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">Categorias</div>
+        <a class="nav-item" onclick="switchTab(event, 'tab-crash')"><i data-lucide="rocket"></i> Crash Games</a>
+        <a class="nav-item" onclick="switchTab(event, 'tab-roletas')"><i data-lucide="dices"></i> Roletas & Double</a>
+        <a class="nav-item" onclick="switchTab(event, 'tab-vivo')"><i data-lucide="users"></i> Cassino ao Vivo</a>
+      </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main>
+      
+      <!-- ABA 1: POPULARES -->
+      <div id="tab-populares" class="tab-content active-tab">
+        <!-- CARROSSEL -->
+        <div class="carousel-container">
+          <button class="carousel-arrow left" onclick="prevSlide()">
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <button class="carousel-arrow right" onclick="nextSlide()">
+            <i data-lucide="chevron-right"></i>
+          </button>
+
+          <div class="carousel-slides" id="carouselSlides">
+            <img src="https://imgs.search.brave.com/hVAQRlBlsaM4WURTbJ6y2JqbWq8KUQDr0DN0kzln7ho/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/Ymlnd2luYm9hcmQu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDI1LzAyLzpgLnNv/ZnQtbG9nbzIuZ2lm.gif" class="hero-banner-img" alt="Banner PG Soft">
+            <img src="https://static.kto.bet.br/lo/2025/05/28194746/Lobby-Pages-6.png.webp" class="hero-banner-img" alt="Banner Lobby">
+          </div>
+
+          <div class="carousel-dots">
+            <div class="dot active" onclick="goToSlide(0)"></div>
+            <div class="dot" onclick="goToSlide(1)"></div>
+          </div>
+        </div>
+
+        <!-- ABAS RÁPIDAS -->
+        <div class="category-tabs">
+          <button class="tab-btn active"><i data-lucide="sparkles" style="width:16px;"></i> Todos os Jogos</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-slots')"><i data-lucide="flame" style="width:16px;"></i> Jogos Fortune</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-crash')"><i data-lucide="rocket" style="width:16px;"></i> Crash Games</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-esportes')"><i data-lucide="trophy" style="width:16px;"></i> Futebol / Esportes</button>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="crown" style="color: var(--text-main);"></i> Jogos Destaque</div>
+        </div>
+
+        <!-- APENAS JOGOS DE SLOT EM DESTAQUE -->
+        <div class="games-grid">
+          <div class="game-card" onclick="window.location.href='fortune-dragon.html'">
+            <span class="badge-pop" style="background: #eab308; color: #000;">🐉 DRAGON</span>
+            <div class="card-bg bg-dragon"></div>
+          </div>
+          <div class="game-card" onclick="window.location.href='fortune-tiger.html'">
+            <span class="badge-pop">🔥 EM ALTA</span>
+            <div class="card-bg bg-tiger"></div>
+          </div>
+          <div class="game-card" onclick="window.location.href='fortune-rabbit.html'">
+            <span class="badge-pop">MAX 500x</span>
+            <div class="card-bg bg-rabbit"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OUTRAS ABAS -->
+      <div id="tab-slots" class="tab-content">
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="sparkles" style="color: var(--primary);"></i> Slots Fortune</div>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Coleção completa de caça-níqueis premiados.</p>
+        <div class="games-grid">
+          <div class="game-card" onclick="window.location.href='fortune-dragon.html'">
+            <span class="badge-pop" style="background: #eab308; color: #000;">🐉 DRAGON</span>
+            <div class="card-bg bg-dragon"></div>
+          </div>
+          <div class="game-card" onclick="window.location.href='fortune-tiger.html'">
+            <span class="badge-pop">🔥 EM ALTA</span>
+            <div class="card-bg bg-tiger"></div>
+          </div>
+          <div class="game-card" onclick="window.location.href='fortune-rabbit.html'">
+            <span class="badge-pop">MAX 500x</span>
+            <div class="card-bg bg-rabbit"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-cassino" class="tab-content">
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="gamepad-2" style="color: var(--primary);"></i> Cassino Principal</div>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Explore jogos de mesa, slots exclusivos e muito mais.</p>
+        <div class="games-grid">
+          <div class="game-card" onclick="window.location.href='double.html'">
+            <span class="badge-pop" style="background:#dc2626; color:#fff;">🎲 DOUBLE</span>
+            <div class="card-bg bg-double">
+              <span style="font-size: 2.5rem; margin-bottom: 5px;">🎯</span>
+              <span style="font-size: 0.9rem; font-weight: bold; color: #fff;">DOUBLE BLAZE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-esportes" class="tab-content">
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="trophy" style="color: var(--primary);"></i> Esportes & Apostas</div>
+        </div>
+        <p style="color: var(--text-muted);">Acompanhe partidas ao vivo e faça suas apostas esportivas.</p>
+      </div>
+
+      <div id="tab-crash" class="tab-content">
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="rocket" style="color: var(--primary);"></i> Crash Games</div>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Multiplicadores rápidos e muita emoção.</p>
+        <div class="games-grid">
+          <div class="game-card" onclick="window.location.href='crash.html'">
+            <span class="badge-pop" style="background: var(--primary); color: #000;">🚀 CRASH</span>
+            <div class="card-bg" style="background-image: url('https://static.casino.guru/pict/1306407/Rocket-Crash.png?timestamp=1755242849000&imageDataId=1428102&width=270&height=208'); background-size: cover; background-position: center;"></div>
+          </div>
+          <div class="game-card" onclick="window.location.href='mines.html'">
+            <span class="badge-pop">💣 MINES</span>
+            <div class="card-bg bg-mines"></div>
+          </div>
+          <div class="game-card" onclick="window.location.href='double.html'">
+            <span class="badge-pop" style="background:#dc2626; color:#fff;">🎲 DOUBLE</span>
+            <div class="card-bg bg-double">
+              <span style="font-size: 2.5rem; margin-bottom: 5px;">🎯</span>
+              <span style="font-size: 0.9rem; font-weight: bold; color: #fff;">DOUBLE BLAZE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-roletas" class="tab-content">
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="dices" style="color: var(--primary);"></i> Roletas & Double</div>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Jogue no Double e roletas interativas.</p>
+      </div>
+
+      <div id="tab-vivo" class="tab-content">
+        <div class="section-header">
+          <div class="section-title"><i data-lucide="users" style="color: var(--primary);"></i> Cassino ao Vivo</div>
+        </div>
+        <p style="color: var(--text-muted);">Mesas interativas com dealers reais em tempo real.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL DE GERENCIAMENTO DE SALDO (PIX / CARTÃO / SAQUE) -->
+  <div class="modal-overlay" id="walletModal">
+    <div class="modal-box">
+      <div class="modal-header-tabs">
+        <button class="modal-tab-btn active" onclick="switchModalTab('deposit')">Depositar</button>
+        <button class="modal-tab-btn" onclick="switchModalTab('withdraw')">Sacar</button>
+      </div>
+
+      <!-- SEÇÃO DEPOSITAR -->
+      <div id="depositTabContent">
+        <h3>Adicionar Fundos</h3>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <button type="button" id="payMethodPix" class="pay-method-btn active" onclick="switchPaymentMethod('pix')">
+            <i data-lucide="qr-code" style="width: 16px;"></i> PIX (Mercado Pago)
+          </button>
+          <button type="button" id="payMethodCard" class="pay-method-btn" onclick="switchPaymentMethod('card')">
+            <i data-lucide="credit-card" style="width: 16px;"></i> Cartão
+          </button>
+        </div>
+
+        <div id="cardFieldsContainer" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 15px; text-align: left;">
+          <input type="number" id="depositAmountCard" class="modal-input" value="100" min="20" step="10" placeholder="Valor (R$)">
+          <input type="text" placeholder="Número do Cartão" class="modal-input" style="font-size: 0.9rem; margin-bottom: 0;" maxlength="19">
+          <div style="display: flex; gap: 10px;">
+            <input type="text" placeholder="MM/AA" class="modal-input" style="font-size: 0.9rem; margin-bottom: 0;" maxlength="5">
+            <input type="text" placeholder="CVV" class="modal-input" style="font-size: 0.9rem; margin-bottom: 0;" maxlength="4">
+          </div>
+          <input type="text" placeholder="Nome no Cartão" class="modal-input" style="font-size: 0.9rem; margin-bottom: 0;">
+          <button class="btn-modal-confirm" onclick="confirmCardDeposit()">Pagar com Cartão</button>
+        </div>
+
+        <div id="pixFieldsContainer" style="display: flex; flex-direction: column;">
+          <div class="preset-buttons-grid">
+            <button type="button" class="preset-btn" onclick="setPresetValue(20)">R$ 20</button>
+            <button type="button" class="preset-btn" onclick="setPresetValue(40)">R$ 40</button>
+            <button type="button" class="preset-btn" onclick="setPresetValue(50)">R$ 50</button>
+            <button type="button" class="preset-btn active" onclick="setPresetValue(100)">R$ 100</button>
+            <button type="button" class="preset-btn" onclick="setPresetValue(200)">R$ 200</button>
+          </div>
+
+          <div class="form-group-pix">
+            <label>Valor do Depósito (Mínimo R$ 20)</label>
+            <input type="number" id="depositAmount" class="modal-input" value="100" min="20" step="1" oninput="validateAmountInput(this)">
+          </div>
+
+          <div class="qr-container">
+            <img src="qr-code-estatico-mercado-pago.png" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020126580014br.gov.bcb.pix...';" alt="QR Code Pix Mercado Pago" class="qr-img">
+            <div class="qr-instructions">
+              Escaneie o QR Code acima pelo app do seu banco ou copie a chave Pix do Mercado Pago. Efetue o pagamento exato e cole o código E2E abaixo.
+            </div>
+          </div>
+
+          <div id="pixAlertSuccess" class="alert-box alert-success"></div>
+          <div id="pixAlertError" class="alert-box alert-error"></div>
+
+          <div class="form-group-pix">
+            <label>Código End-to-End (E2E) do Comprovante</label>
+            <input type="text" id="e2eInput" class="modal-input" placeholder="Ex: E123456782026... (ID da transação)" style="margin-bottom: 12px; font-size: 0.95rem; text-align: left; padding: 10px;">
+          </div>
+
+          <div class="form-group-pix">
+            <label>Valor a Confirmar</label>
+            <input type="text" id="depositAmountDisplay" class="modal-input" value="R$ 100,00" readonly style="background-color: var(--bg-hover); margin-bottom: 15px; color: var(--primary);">
+          </div>
+
+          <button class="btn-modal-confirm" id="btnConfirmDeposit" onclick="confirmPixDeposit()">Confirmar Depósito</button>
+        </div>
+
+      </div>
+
+      <!-- SEÇÃO SACAR COM STATUS TEMPORAL DE 3 DIAS -->
+      <div id="withdrawTabContent" style="display: none;">
+        <h3>Retirar Fundos (Pix)</h3>
+        
+        <div class="form-group-pix">
+          <label>Chave Pix para Recebimento</label>
+          <input type="text" id="withdrawPixKey" class="modal-input" placeholder="CPF, E-mail ou Celular" style="font-size: 0.95rem; text-align: left; padding: 10px; margin-bottom: 10px;">
+        </div>
+
+        <div class="form-group-pix">
+          <label>Valor do Saque (R$)</label>
+          <input type="number" id="withdrawAmount" class="modal-input" value="100" min="20" step="10">
+        </div>
+
+        <button class="btn-modal-confirm" onclick="confirmWithdraw()">Solicitar Saque</button>
+
+        <!-- HISTÓRICO E STATUS DE RASTREAMENTO -->
+        <div class="withdraw-history-box">
+          <div class="withdraw-history-title">
+            <i data-lucide="clock" style="width: 16px;"></i> Solicitações em Andamento
+          </div>
+          <div id="withdrawListContainer">
+            <!-- Os cards de status serão gerados via JS -->
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-modal-cancel" onclick="closeWalletModal()">Fechar</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE LOGIN / CADASTRO -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box" style="width: 420px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin-bottom: 0;">Conta WillBet</h3>
+        <button onclick="closeAuthModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="modal-header-tabs">
+        <button class="modal-tab-btn active" onclick="switchAuthTab('login')">Entrar</button>
+        <button class="modal-tab-btn" onclick="switchAuthTab('register')">Cadastrar</button>
+      </div>
+
+      <div id="modalLoginSection" style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">E-mail ou CPF</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 12px;">
+            <i data-lucide="user" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="text" id="loginIdentifier" placeholder="seu@email.com ou CPF" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 11px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Senha</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 12px;">
+            <i data-lucide="lock" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="password" id="loginPassword" placeholder="Sua senha" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 11px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <button class="btn-modal-confirm" onclick="handleLogin()" style="margin-top: 10px;">Entrar</button>
+      </div>
+
+      <!-- FORMULÁRIO DE CADASTRO -->
+      <div id="modalRegisterSection" style="display: none; flex-direction: column; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">E-mail</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 10px;">
+            <i data-lucide="mail" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="email" id="regEmail" placeholder="seu@email.com" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 10px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">CPF</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 10px;">
+            <i data-lucide="id-card" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="text" id="regCpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 10px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Nome Completo</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 10px;">
+            <i data-lucide="user-check" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="text" id="regName" placeholder="João da Silva" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 10px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Número de Telefone</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 10px;">
+            <i data-lucide="phone" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="text" id="regPhone" placeholder="(00) 00000-0000" maxlength="15" oninput="maskPhone(this)" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 10px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Senha</span>
+          <div style="display: flex; align-items: center; background-color: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 10px;">
+            <i data-lucide="lock" style="color: var(--text-muted); width: 16px; margin-right: 8px;"></i>
+            <input type="password" id="regPassword" placeholder="Crie uma senha" style="flex: 1; background: none; border: none; color: var(--text-main); padding: 10px 0; font-size: 0.9rem; outline: none;">
+          </div>
+        </div>
+
+        <button class="btn-modal-confirm" onclick="handleRegister()" style="margin-top: 5px;">Criar Conta</button>
+      </div>
+
+      <button class="btn-modal-cancel" onclick="closeAuthModal()">Fechar</button>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // --- DADOS DO USUÁRIO LOGADO ---
+    const loggedUserFromStorage = JSON.parse(localStorage.getItem('currentUser'));
+    const usuarioLogado = loggedUserFromStorage || { 
+      cpf: "123.456.789-00", 
+      name: "Joao Silva" 
+    };
+
+    // --- VERIFICAÇÃO DE SESSÃO E LOGIN NO HEADER ---
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const authHeaderArea = document.getElementById('authHeaderArea');
+
+    if (isLoggedIn && loggedUserFromStorage) {
+      const userName = loggedUserFromStorage.name || loggedUserFromStorage.nome || 'Usuário';
+      authHeaderArea.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Olá, ${userName.split(' ')[0]}</span>
+          <button onclick="logout()" style="background: none; border: 1px solid var(--border-color); color: #ef4444; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">Sair</button>
+        </div>
+      `;
+    }
+
+    function openAuthModal() {
+      document.getElementById('authModal').style.display = 'flex';
+      switchAuthTab('login');
+      lucide.createIcons();
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').style.display = 'none';
+    }
+
+    function switchAuthTab(tab) {
+      const loginSec = document.getElementById('modalLoginSection');
+      const regSec = document.getElementById('modalRegisterSection');
+      const tabBtns = document.querySelectorAll('#authModal .modal-tab-btn');
+
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+
+      if (tab === 'login') {
+        loginSec.style.display = 'flex';
+        regSec.style.display = 'none';
+        tabBtns[0].classList.add('active');
+      } else {
+        loginSec.style.display = 'none';
+        regSec.style.display = 'flex';
+        tabBtns[1].classList.add('active');
+      }
+      lucide.createIcons();
+    }
+
+    function maskCPF(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      input.value = value;
+    }
+
+    function maskPhone(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+      value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+      value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+      input.value = value;
+    }
+
+    function handleRegister() {
+      const email = document.getElementById('regEmail').value.trim();
+      const cpf = document.getElementById('regCpf').value.trim();
+      const name = document.getElementById('regName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+
+      if (!email || !cpf || !name || !phone || !password) {
+        alert('Preencha todos os campos do cadastro.');
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('willbet_users')) || [];
+      const existing = users.find(u => u.email === email || u.cpf === cpf);
+      if (existing) {
+        alert('E-mail ou CPF já cadastrados!');
+        return;
+      }
+
+      const newUser = { email, cpf, name, phone, password };
+      users.push(newUser);
+      localStorage.setItem('willbet_users', JSON.stringify(users));
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+      localStorage.setItem('user_balance', '1250.00');
+      localStorage.setItem('isLoggedIn', 'true');
+
+      alert('Cadastro realizado com sucesso!');
+      window.location.reload();
+    }
+
+    function handleLogin() {
+      const identifier = document.getElementById('loginIdentifier').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+
+      if (!identifier || !password) {
+        alert('Preencha o e-mail/CPF e a senha.');
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('willbet_users')) || [];
+      const user = users.find(u => (u.email === identifier || u.cpf === identifier) && u.password === password);
+
+      if (user) {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        localStorage.setItem('isLoggedIn', 'true');
+        if (!localStorage.getItem('user_balance')) {
+          localStorage.setItem('user_balance', '1250.00');
+        }
+        window.location.reload();
+      } else {
+        alert('Dados incorretos ou conta não encontrada.');
+      }
+    }
+
+    function logout() {
+      localStorage.setItem('isLoggedIn', 'false');
+      localStorage.removeItem('currentUser');
+      window.location.reload();
+    }
+
+    // --- LÓGICA DE DEPÓSITO PIX & INTEGRAÇÃO COM BACKEND ---
+
+    function setPresetValue(val) {
+      document.getElementById('depositAmount').value = val;
+      updateDisplayAmount(val);
+
+      const presetBtns = document.querySelectorAll('.preset-btn');
+      presetBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.innerText.includes(val)) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    function validateAmountInput(input) {
+      let val = parseFloat(input.value);
+      updateDisplayAmount(isNaN(val) ? 0 : val);
+    }
+
+    function updateDisplayAmount(val) {
+      document.getElementById('depositAmountDisplay').value = 'R$ ' + parseFloat(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    updateDisplayAmount(100);
+
+    async function confirmPixDeposit() {
+      const e2eInput = document.getElementById('e2eInput');
+      const e2eVal = e2eInput.value.trim();
+      const amountVal = parseFloat(document.getElementById('depositAmount').value);
+      
+      const alertSuccess = document.getElementById('pixAlertSuccess');
+      const alertError = document.getElementById('pixAlertError');
+
+      alertSuccess.style.display = 'none';
+      alertError.style.display = 'none';
+
+      if (!e2eVal) {
+        alertError.style.display = 'block';
+        alertError.innerHTML = 'Atenção: Por favor, preencha o Código End-to-End (E2E) do comprovante Pix.';
+        e2eInput.focus();
+        return;
+      }
+
+      if (isNaN(amountVal) || amountVal < 20) {
+        alertError.style.display = 'block';
+        alertError.innerHTML = 'O valor mínimo para depósito via Pix é de R$ 20,00.';
+        return;
+      }
+
+      const activeUser = JSON.parse(localStorage.getItem('currentUser')) || { 
+        cpf: "123.456.789-00", 
+        name: "João Silva" 
+      };
+
+      const cpfToSend = activeUser.cpf || "123.456.789-00";
+      const nameToSend = activeUser.name || activeUser.nome || "João Silva";
+
+      try {
+        const response = await fetch('http://localhost:3000/api/deposit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            e2e: e2eVal,
+            cpf: cpfToSend,
+            cpfUsuario: cpfToSend,
+            nome: nameToSend,
+            nomeUsuario: nameToSend,
+            valor: amountVal,
+            status: 'PENDENTE_CONFERENCIA'
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alertError.style.display = 'block';
+          alertError.innerHTML = result.error || 'Erro de segurança: Este código E2E já foi cadastrado anteriormente!';
+          return;
+        }
+
+        currentBalance += amountVal;
+        updateBalanceUI();
+
+        alertSuccess.style.display = 'block';
+        alertSuccess.innerHTML = result.message || 'Saldo liberado instantaneamente!';
+
+        setTimeout(() => {
+          e2eInput.value = '';
+          closeWalletModal();
+        }, 2000);
+
+      } catch (error) {
+        console.error('Erro de conexão:', error);
+        alertError.style.display = 'block';
+        alertError.innerHTML = 'Erro de conexão com o servidor. Verifique se o backend está rodando (`node server.js`).';
+      }
+    }
+
+    function confirmCardDeposit() {
+      const amountCard = parseFloat(document.getElementById('depositAmountCard').value);
+      if (!isNaN(amountCard) && amountCard >= 20) {
+        alert('Processando pagamento via Cartão de Crédito...');
+        currentBalance += amountCard;
+        updateBalanceUI();
+        closeWalletModal();
+      } else {
+        alert('Valor mínimo para depósito no cartão é R$ 20,00.');
+      }
+    }
+
+    // --- SISTEMA DE ABAS DO MENU LATERAL ---
+    function switchTab(event, tabId) {
+      event.preventDefault();
+
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active-tab');
+      });
+
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add('active-tab');
+      }
+
+      event.currentTarget.classList.add('active');
+      lucide.createIcons();
+    }
+
+    // --- GERENCIAMENTO DE SALDO ---
+    let currentBalance = parseFloat(localStorage.getItem('user_balance')) || 1250.00;
+
+    function updateBalanceUI() {
+      const balanceEl = document.getElementById('wallet-balance');
+      balanceEl.innerText = 'R$ ' + currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      localStorage.setItem('user_balance', currentBalance);
+
+      balanceEl.classList.add('pulse-anim');
+      setTimeout(() => {
+        balanceEl.classList.remove('pulse-anim');
+      }, 500);
+    }
+
+    document.getElementById('wallet-balance').innerText = 'R$ ' + currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function openWalletModal() {
+      document.getElementById('walletModal').style.display = 'flex';
+      switchModalTab('deposit');
+      switchPaymentMethod('pix');
+    }
+
+    function closeWalletModal() {
+      document.getElementById('walletModal').style.display = 'none';
+    }
+
+    function switchModalTab(tab) {
+      const depContent = document.getElementById('depositTabContent');
+      const witContent = document.getElementById('withdrawTabContent');
+      const tabBtns = document.querySelectorAll('#walletModal .modal-tab-btn');
+
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+
+      if (tab === 'deposit') {
+        depContent.style.display = 'block';
+        witContent.style.display = 'none';
+        tabBtns[0].classList.add('active');
+      } else {
+        depContent.style.display = 'none';
+        witContent.style.display = 'block';
+        tabBtns[1].classList.add('active');
+        renderWithdrawals(); // Atualiza a lista ao abrir a aba de saque
+      }
+    }
+
+    function switchPaymentMethod(method) {
+      const btnPix = document.getElementById('payMethodPix');
+      const btnCard = document.getElementById('payMethodCard');
+      const cardFields = document.getElementById('cardFieldsContainer');
+      const pixFields = document.getElementById('pixFieldsContainer');
+
+      if (method === 'pix') {
+        btnPix.classList.add('active');
+        btnCard.classList.remove('active');
+        cardFields.style.display = 'none';
+        pixFields.style.display = 'flex';
+      } else {
+        btnCard.classList.add('active');
+        btnPix.classList.remove('active');
+        cardFields.style.display = 'flex';
+        pixFields.style.display = 'none';
+      }
+      lucide.createIcons();
+    }
+
+    // --- LÓGICA DE SAQUE COM STATUS DE 3 DIAS ---
+    function getWithdrawalStatus(createdAt) {
+      const now = Date.now();
+      const diffHours = (now - createdAt) / (1000 * 60 * 60);
+
+      // Primeiro dia (0h a 24h)
+      if (diffHours < 24) {
+        return {
+          title: "Processando (Dia 1/3)",
+          desc: "Saldo sendo movido para a conta bancária vinculada.",
+          badgeClass: "status-moving"
+        };
+      } 
+      // Segundo e terceiro dias (24h a 72h)
+      else if (diffHours < 72) {
+        return {
+          title: "Em Análise (Dia 2-3/3)",
+          desc: "Solicitação em verificação anti-fraude e conformidade.",
+          badgeClass: "status-antifraud"
+        };
+      } 
+      // Após 3 dias (>= 72h)
+      else {
+        return {
+          title: "Concluído",
+          desc: "Transferência executada e valor enviado com sucesso.",
+          badgeClass: "status-completed"
+        };
+      }
+    }
+
+    function renderWithdrawals() {
+      const container = document.getElementById('withdrawListContainer');
+      const withdrawals = JSON.parse(localStorage.getItem('willbet_withdrawals')) || [];
+
+      if (withdrawals.length === 0) {
+        container.innerHTML = `<p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 10px;">Nenhuma solicitação de saque recente.</p>`;
+        return;
+      }
+
+      container.innerHTML = withdrawals.map(w => {
+        const statusInfo = getWithdrawalStatus(w.createdAt);
+        const dateStr = new Date(w.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        return `
+          <div class="withdraw-card">
+            <div class="withdraw-card-header">
+              <span>R$ ${parseFloat(w.amount).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+              <span class="withdraw-card-status ${statusInfo.badgeClass}">${statusInfo.title}</span>
+            </div>
+            <div class="withdraw-card-desc">${statusInfo.desc}</div>
+            <div style="font-size: 0.7rem; color: var(--accent); margin-top: 2px;">Chave Pix: ${w.pixKey} • ${dateStr}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function confirmWithdraw() {
+      const inputVal = parseFloat(document.getElementById('withdrawAmount').value);
+      const pixKey = document.getElementById('withdrawPixKey').value.trim();
+
+      if (!pixKey) {
+        alert('Por favor, informe a Chave Pix para o saque.');
+        return;
+      }
+
+      if (isNaN(inputVal) || inputVal <= 0) {
+        alert('Insira um valor válido para saque.');
+        return;
+      }
+
+      if (inputVal > currentBalance) {
+        alert('Saldo insuficiente para realizar este saque.');
+        return;
+      }
+
+      // Subtrai o saldo e grava a solicitação de saque com timestamp
+      currentBalance -= inputVal;
+      updateBalanceUI();
+
+      const withdrawals = JSON.parse(localStorage.getItem('willbet_withdrawals')) || [];
+      withdrawals.unshift({
+        id: 'WDR-' + Date.now(),
+        amount: inputVal,
+        pixKey: pixKey,
+        createdAt: Date.now()
+      });
+
+      localStorage.setItem('willbet_withdrawals', JSON.stringify(withdrawals));
+      
+      alert('Solicitação de saque enviada com sucesso! Você pode acompanhar o status na lista abaixo.');
+      
+      document.getElementById('withdrawPixKey').value = '';
+      renderWithdrawals();
+    }
+
+    // --- CARROSSEL ---
+    let currentSlide = 0;
+    const totalSlides = 2;
+    const slidesContainer = document.getElementById('carouselSlides');
+    const dots = document.querySelectorAll('.dot');
+
+    function updateCarousel() {
+      slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      updateCarousel();
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      updateCarousel();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateCarousel();
+    }
+
+    setInterval(nextSlide, 5000);
+  </script>
+</body>
+</html>

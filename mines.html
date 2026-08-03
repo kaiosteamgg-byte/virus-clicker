@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WillBet - Mines</title>
+  <!-- Ícones via Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-dark: #09090b;
+      --bg-card: #121214;
+      --bg-panel: #18181b;
+      --bg-hover: #222226;
+      --primary: #f4f4f5;
+      --primary-hover: #e4e4e7;
+      --text-main: #fafafa;
+      --text-muted: #a1a1aa;
+      --border-color: #27272a;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* CABEÇALHO */
+    header {
+      height: 70px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border-radius: 8px;
+      background-color: var(--bg-hover);
+      transition: background 0.2s;
+    }
+
+    .back-btn:hover {
+      background-color: var(--border-color);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .wallet-box {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .wallet-box span {
+      color: var(--primary);
+      transition: transform 0.2s ease;
+    }
+
+    @keyframes pulse-balance {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.15); filter: brightness(1.4); text-shadow: 0 0 10px var(--primary); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    .pulse-anim {
+      animation: pulse-balance 0.5s ease;
+    }
+
+    /* CONTEÚDO DO JOGO */
+    .game-container {
+      display: flex;
+      flex: 1;
+      padding: 20px;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* PAINEL ESQUERDO DE APOSTAS */
+    .bet-panel {
+      width: 340px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .bet-panel-top {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mode-tabs {
+      display: flex;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .mode-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-tab.active {
+      background-color: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .amount-box {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .amount-box input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      padding: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      outline: none;
+    }
+
+    .amount-box .currency {
+      padding-right: 12px;
+      color: var(--text-muted);
+      font-weight: bold;
+    }
+
+    .multiplier-btns {
+      display: flex;
+      gap: 5px;
+      padding: 0 10px 10px 10px;
+      background-color: var(--bg-dark);
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+      margin-top: -5px;
+    }
+
+    .mult-btn {
+      flex: 1;
+      background: var(--bg-hover);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .mult-btn:hover {
+      background-color: var(--border-color);
+    }
+
+    .select-box {
+      width: 100%;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .action-btn {
+      width: 100%;
+      background-color: #881337; /* Vinho / Bordô padrão WillBet */
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, filter 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .action-btn:hover {
+      filter: brightness(1.15);
+    }
+
+    .action-btn.cashout {
+      background-color: var(--accent-green);
+      color: #000;
+    }
+
+    .bet-panel-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .icon-action-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .icon-action-btn:hover {
+      color: var(--text-main);
+      border-color: var(--text-muted);
+    }
+
+    /* PAINEL DIREITO (ÁREA DO JOGO MINES) */
+    .game-main-panel {
+      flex: 1;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 40px;
+      overflow: hidden;
+    }
+
+    .mines-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      grid-template-rows: repeat(5, 80px);
+      gap: 12px;
+    }
+
+    .mine-tile {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, background-color 0.2s, border-color 0.2s;
+      user-select: none;
+    }
+
+    .mine-tile:hover:not(.revealed):not(:disabled) {
+      background-color: var(--bg-hover);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .mine-tile.revealed-star {
+      background-color: rgba(16, 185, 129, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .mine-tile.revealed-mine {
+      background-color: rgba(239, 68, 68, 0.2);
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+
+    .online-indicator {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #34d399;
+    }
+
+    .online-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34d399;
+    }
+
+    .status-overlay-text {
+      position: absolute;
+      top: 30px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    @media (max-width: 900px) {
+      .game-container { flex-direction: column; padding: 10px; }
+      .bet-panel { width: 100%; }
+      .mines-grid { grid-template-columns: repeat(5, 60px); grid-template-rows: repeat(5, 60px); gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="header-left">
+      <button class="back-btn" onclick="window.location.href='index.html'"><i data-lucide="arrow-left"></i></button>
+      <a href="index.html" class="logo">Will<span style="color: var(--text-muted);">Bet</span></a>
+    </div>
+    
+    <div class="header-right">
+      <div class="wallet-box">
+        <i data-lucide="wallet" style="width: 18px;"></i>
+        <span id="wallet-balance">R$ 1.250,00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ESTRUTURA DO JOGO -->
+  <div class="game-container">
+    
+    <!-- PAINEL DE APOSTAS (ESQUERDA) -->
+    <div class="bet-panel">
+      <div class="bet-panel-top">
+        <div class="mode-tabs">
+          <button class="mode-tab active">Normal</button>
+          <button class="mode-tab">Auto</button>
+        </div>
+
+        <div class="input-group">
+          <span class="input-label">Valor da Aposta (R$)</span>
+          <div class="amount-box">
+            <input type="number" id="betAmount" value="10.00" min="1" step="1">
+            <span class="currency">R$</span>
+          </div>
+          <div class="multiplier-btns">
+            <button class="mult-btn" onclick="halveBet()">½</button>
+            <button class="mult-btn" onclick="doubleBet()">2x</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <span class="input-label">Número de Minas</span>
+          <select id="mineCount" class="select-box">
+            <option value="1">1 Mina</option>
+            <option value="2">2 Minas</option>
+            <option value="3" selected>3 Minas</option>
+            <option value="5">5 Minas</option>
+            <option value="10">10 Minas</option>
+            <option value="15">15 Minas</option>
+            <option value="20">20 Minas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bet-panel-bottom" style="flex-direction: column; gap: 15px;">
+        <button id="actionBtn" class="action-btn" onclick="handleAction()">Iniciar Jogo</button>
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+          <button class="icon-action-btn"><i data-lucide="maximize" style="width: 18px;"></i></button>
+          <button class="icon-action-btn"><i data-lucide="info" style="width: 18px;"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL DO JOGO (DIREITA) -->
+    <div class="game-main-panel">
+      <div id="statusText" class="status-overlay-text">Clique em 'Iniciar Jogo' para começar</div>
+      
+      <div class="mines-grid" id="minesGrid">
+        <!-- Gerado via JS -->
+      </div>
+
+      <div class="online-indicator">
+        <div class="online-dot"></div>
+        Online
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Sincronização de saldo
+    let currentBalance = parseFloat(localStorage.getItem('user_balance')) || 1250.00;
+    const balanceEl = document.getElementById('wallet-balance');
+
+    function updateBalanceUI() {
+      balanceEl.innerText = 'R$ ' + currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      localStorage.setItem('user_balance', currentBalance);
+
+      balanceEl.classList.add('pulse-anim');
+      setTimeout(() => {
+        balanceEl.classList.remove('pulse-anim');
+      }, 500);
+    }
+    updateBalanceUI();
+
+    // Controles de valor
+    const betInput = document.getElementById('betAmount');
+    function halveBet() {
+      let val = parseFloat(betInput.value) / 2;
+      betInput.value = Math.max(1, val).toFixed(2);
+    }
+    function doubleBet() {
+      let val = parseFloat(betInput.value) * 2;
+      betInput.value = val.toFixed(2);
+    }
+
+    // Lógica do Mines
+    const gridEl = document.getElementById('minesGrid');
+    const actionBtn = document.getElementById('actionBtn');
+    const statusText = document.getElementById('statusText');
+    const mineCountSelect = document.getElementById('mineCount');
+
+    let gameActive = false;
+    let mines = [];
+    let revealedCount = 0;
+    let currentMultiplier = 1.0;
+    let currentBet = 0;
+
+    function createBoard(disabled = true) {
+      gridEl.innerHTML = '';
+      for (let i = 0; i < 25; i++) {
+        const tile = document.createElement('button');
+        tile.className = 'mine-tile';
+        tile.disabled = disabled;
+        tile.onclick = () => clickTile(i, tile);
+        gridEl.appendChild(tile);
+      }
+    }
+    createBoard(true);
+
+    function handleAction() {
+      if (!gameActive) {
+        // Iniciar Jogo
+        currentBet = parseFloat(betInput.value);
+        if (isNaN(currentBet) || currentBet <= 0) {
+          alert('Insira um valor de aposta válido.');
+          return;
+        }
+        if (currentBet > currentBalance) {
+          alert('Saldo insuficiente.');
+          return;
+        }
+
+        currentBalance -= currentBet;
+        updateBalanceUI();
+
+        gameActive = true;
+        revealedCount = 0;
+        currentMultiplier = 1.0;
+        
+        actionBtn.innerText = 'Retirar (R$ 0,00)';
+        actionBtn.classList.add('cashout');
+        statusText.innerText = 'Boa sorte! Encontre as estrelas.';
+        mineCountSelect.disabled = true;
+        betInput.disabled = true;
+
+        // Gerar minas aleatórias
+        const numMines = parseInt(mineCountSelect.value);
+        mines = [];
+        while (mines.length < numMines) {
+          let r = Math.floor(Math.random() * 25);
+          if (!mines.includes(r)) mines.push(r);
+        }
+
+        createBoard(false);
+      } else {
+        // Realizar Cashout manualmente
+        cashOut();
+      }
+    }
+
+    function clickTile(index, tile) {
+      if (!gameActive || tile.classList.contains('revealed-star')) return;
+
+      if (mines.includes(index)) {
+        // Acertou mina (Perdeu)
+        tile.classList.add('revealed-mine');
+        tile.innerHTML = `<i data-lucide="bomb" style="width:32px; height:32px;"></i>`;
+        lucide.createIcons();
+        gameOver(false);
+      } else {
+        // Acertou estrela (Ganhou)
+        tile.classList.add('revealed-star');
+        tile.innerHTML = `<i data-lucide="star" style="width:32px; height:32px;"></i>`;
+        lucide.createIcons();
+        revealedCount++;
+
+        // Calcula multiplicador progressivo simples
+        currentMultiplier += 0.24 * parseInt(mineCountSelect.value);
+        let currentPayout = currentBet * currentMultiplier;
+        actionBtn.innerText = `Retirar (R$ ${currentPayout.toFixed(2)})`;
+
+        // Se abrir tudo que restou sem minas
+        const totalTiles = 25 - parseInt(mineCountSelect.value);
+        if (revealedCount === totalTiles) {
+          cashOut(true);
+        }
+      }
+    }
+
+    function cashOut(fullWin = false) {
+      if (!gameActive) return;
+      let payout = currentBet * currentMultiplier;
+      currentBalance += payout;
+      updateBalanceUI();
+
+      statusText.innerText = fullWin ? `Parabéns! Você limpou o campo e ganhou R$ ${payout.toFixed(2)}!` : `Retirado com sucesso! Ganho: R$ ${payout.toFixed(2)}`;
+      revealAll(true);
+      endGameClean();
+    }
+
+    function gameOver(won) {
+      if (!won) {
+        statusText.innerText = 'Boom! Você atingiu uma mina.';
+        revealAll(false);
+      }
+      endGameClean();
+    }
+
+    function revealAll(won) {
+      const tiles = gridEl.children;
+      for (let i = 0; i < 25; i++) {
+        tiles[i].disabled = true;
+        if (mines.includes(i)) {
+          tiles[i].classList.add('revealed-mine');
+          tiles[i].innerHTML = `<i data-lucide="bomb" style="width:28px; height:28px;"></i>`;
+        } else if (!tiles[i].classList.contains('revealed-star')) {
+          tiles[i].style.opacity = '0.4';
+          tiles[i].innerHTML = `<i data-lucide="star" style="width:24px; height:24px;"></i>`;
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function endGameClean() {
+      gameActive = false;
+      actionBtn.innerText = 'Iniciar Jogo';
+      actionBtn.classList.remove('cashout');
+      mineCountSelect.disabled = false;
+      betInput.disabled = false;
+    }
+  </script>
+</body>
+</html>

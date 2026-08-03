@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fortune Tiger - Alta Volatilidade Extrema</title>
+  
+  <!-- PROTEÇÃO ANTI-INSPEÇÃO E F12 -->
+  <script>
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.ctrlKey && ['U', 'u'].includes(e.key)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    });
+
+    (function () {
+      const threshold = 160;
+      const checkDevTools = function () {
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        if (widthThreshold || heightThreshold) {
+          document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0b0b0b; color: #ff3333; font-family: sans-serif; font-size: 22px; text-align: center; padding: 20px;">
+              Acesso Restrito: Ferramentas de Desenvolvedor detectadas!
+            </div>`;
+        }
+      };
+      window.addEventListener('resize', checkDevTools);
+      setInterval(checkDevTools, 1000);
+    })();
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka One', cursive, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .game-screen {
+      width: 100vw;
+      max-width: 414px;
+      height: 100vh;
+      max-height: 896px;
+      background: url('assets/tiger/fundo-jogo.png') center top / 100% 100% no-repeat;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,0,0,0.9);
+    }
+
+    /* BOTÃO VOLTAR AO LOBBY */
+    .btn-back-lobby {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #bf953f;
+      color: #fef08a;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      z-index: 100;
+      text-decoration: none;
+    }
+
+    .btn-back-lobby:hover {
+      background: rgba(191, 149, 63, 0.3);
+    }
+
+    .loading-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-start {
+      background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
+      color: white;
+      border: 2px solid #fbcfe8;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      font-weight: 900;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(219, 39, 119, 0.8);
+      text-transform: uppercase;
+    }
+
+    /* ÁREA DA ROLETA */
+    .slot-board {
+      position: absolute;
+      top: 20.8%;
+      left: 6.5%;
+      width: 87%;
+      height: 46%;
+      background-color: #E3B997;
+      display: flex;
+      padding: 2px;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .reel-col {
+      flex: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .reel-strip {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      will-change: transform;
+      transform: translate3d(0, 0, 0);
+    }
+
+    .reel-col:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+      z-index: 5;
+    }
+
+    .symbol-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #E3B997;
+      flex-shrink: 0;
+    }
+
+    .symbol-box img {
+      width: 84%;
+      height: 84%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    /* MÁSCARAS E VALORES DA INTERFACE */
+    .patch-balance {
+      position: absolute;
+      top: 78.2%; left: 11.5%; width: 31%; height: 4.8%;
+      background: #2b0303; border-radius: 20px; z-index: 3;
+    }
+
+    .patch-bet {
+      position: absolute;
+      top: 78.2%; left: 64.5%; width: 25%; height: 4.8%;
+      background: #2b0303; border-radius: 20px; z-index: 3;
+    }
+
+    .balance-text, .bet-text {
+      position: absolute;
+      top: 78.2%;
+      height: 4.8%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #fef08a;
+      z-index: 4;
+      white-space: nowrap;
+    }
+
+    .balance-text { left: 11.5%; width: 31%; }
+    .bet-text { left: 64.5%; width: 25%; font-size: 0.88rem; }
+
+    .click-overlay {
+      position: absolute;
+      background: transparent;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      z-index: 10;
+      border-radius: 50%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .click-overlay:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-spin-trigger { top: 84.5%; left: 37%; width: 26%; height: 12%; }
+    .btn-minus-trigger { top: 86.8%; left: 22.5%; width: 12%; height: 5.5%; }
+    .btn-plus-trigger  { top: 86.8%; left: 66.5%; width: 12%; height: 5.5%; }
+    .btn-turbo-trigger { top: 87.2%; left: 6%; width: 11%; height: 5%; }
+    .btn-auto-trigger  { top: 87.2%; left: 83%; width: 11%; height: 5%; }
+
+    .auto-active {
+      box-shadow: inset 0 0 10px #ff0000;
+      border-radius: 50%;
+    }
+
+    /* MENU DE RODADA AUTOMÁTICA */
+    .auto-modal {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 52%;
+      background: #1e1b24;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      border-top: 2px solid #3d364a;
+      display: none;
+      flex-direction: column;
+      z-index: 200;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+      animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+    }
+
+    .auto-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px 10px 20px;
+      border-bottom: 1px solid #2d2836;
+    }
+
+    .auto-header h3 {
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .auto-close {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .auto-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .auto-body p {
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .auto-options {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .auto-opt-btn {
+      flex: 1;
+      background: #2b2636;
+      border: 2px solid #3d364a;
+      border-radius: 12px;
+      color: #9ca3af;
+      padding: 12px 0;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .auto-opt-btn.selected {
+      background: #3c3447;
+      border-color: #fbbf24;
+      color: #fbbf24;
+    }
+
+    .auto-start-btn {
+      margin-top: 10px;
+      background: linear-gradient(180deg, #fde047 0%, #eab308 100%);
+      color: #181409;
+      border: none;
+      border-radius: 24px;
+      padding: 15px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
+    }
+
+    @keyframes slideUp {
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(0); }
+    }
+
+    /* BANNER DE VITÓRIA */
+    .win-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url('assets/tiger/win-background.png');
+      background-position: center center;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      display: none;
+      z-index: 150;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+
+    .win-content {
+      position: absolute;
+      top: 31.5%;
+      left: 8%;
+      width: 84%;
+      height: 38%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .win-type-title {
+      font-size: 2.3rem;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.05;
+      background: linear-gradient(180deg, #fff7cc 0%, #ffde59 50%, #f39c12 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-text-stroke: 1.5px #0056b3;
+      filter: drop-shadow(0px 3px 0px #002244) drop-shadow(0px 5px 8px rgba(0, 150, 255, 0.6));
+    }
+
+    .win-amount-text {
+      font-size: 3.8rem;
+      text-align: center;
+      letter-spacing: 1.5px;
+      background: linear-gradient(180deg, #ffffff 0%, #fff176 40%, #ffb300 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-text-stroke: 3px #7a0000;
+      filter: drop-shadow(0px 4px 0px #420000) drop-shadow(0px 6px 10px rgba(0, 0, 0, 0.8));
+      paint-order: stroke fill;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-screen">
+
+    <!-- Botão para voltar ao Lobby Principal -->
+    <a href="index.html" class="btn-back-lobby">← Voltar ao Lobby</a>
+
+    <div class="loading-screen" id="loadingScreen">
+      <h2 style="color: #fef08a; font-size: 1.5rem;">FORTUNE TIGER</h2>
+      <button class="btn-start" onclick="startGame()">JOGAR AGORA</button>
+    </div>
+
+    <div class="slot-board" id="slotBoard">
+      <div class="reel-col"><div class="reel-strip" id="strip0"></div></div>
+      <div class="reel-col"><div class="reel-strip" id="strip1"></div></div>
+      <div class="reel-col"><div class="reel-strip" id="strip2"></div></div>
+    </div>
+
+    <div class="patch-balance"></div>
+    <div class="patch-bet"></div>
+
+    <div class="balance-text" id="balanceVal">1,250.00</div>
+    <div class="bet-text" id="betVal">3.00</div>
+
+    <button class="click-overlay btn-spin-trigger" onclick="triggerSpin()"></button>
+    <button class="click-overlay btn-minus-trigger" onclick="adjustBet(-0.50)"></button>
+    <button class="click-overlay btn-plus-trigger" onclick="adjustBet(0.50)"></button>
+    <button class="click-overlay btn-turbo-trigger" id="btnTurbo" onclick="toggleTurbo()"></button>
+    <button class="click-overlay btn-auto-trigger" id="btnAuto" onclick="openAutoModal()"></button>
+
+    <!-- MENU DE RODADAS AUTOMÁTICAS -->
+    <div class="auto-modal" id="autoModal">
+      <div class="auto-header">
+        <h3>Rodada Automática</h3>
+        <button class="auto-close" onclick="closeAutoModal()">&times;</button>
+      </div>
+      <div class="auto-body">
+        <p>Número de Rodadas Automáticas</p>
+        <div class="auto-options">
+          <button class="auto-opt-btn selected" onclick="selectAutoCount(10, this)">10</button>
+          <button class="auto-opt-btn" onclick="selectAutoCount(30, this)">30</button>
+          <button class="auto-opt-btn" onclick="selectAutoCount(50, this)">50</button>
+          <button class="auto-opt-btn" onclick="selectAutoCount(80, this)">80</button>
+          <button class="auto-opt-btn" onclick="selectAutoCount(1000, this)">1000</button>
+        </div>
+        <button class="auto-start-btn" onclick="startAutoSpins()">Iniciar</button>
+      </div>
+    </div>
+
+    <div class="win-modal" id="winModal" onclick="closeWinModal()">
+      <div class="win-content">
+        <div class="win-type-title" id="winTypeTitle">GRANDE<br>GANHO</div>
+        <div class="win-amount-text" id="winModalAmount">0.00</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SYMBOL_IMAGES = [
+      { name: 'Wild',      img: 'assets/tiger/wild.png',      val: 2500, weight: 1 }, 
+      { name: 'Ouro',      img: 'assets/tiger/ouro.png',      val: 100,  weight: 2 },
+      { name: 'Saco',      img: 'assets/tiger/saco.png',      val: 25,   weight: 5 },
+      { name: 'Envelope',  img: 'assets/tiger/envelope.png',  val: 10,   weight: 10 },
+      { name: 'Amuleto',   img: 'assets/tiger/amuleto.png',   val: 8,    weight: 15 },
+      { name: 'Laranja',   img: 'assets/tiger/laranja.png',   val: 5,    weight: 20 },
+      { name: 'Foguete',   img: 'assets/tiger/foguete.png',   val: 3,    weight: 25 }
+    ];
+
+    let balance = parseFloat(localStorage.getItem('user_balance')) || 1250.00;
+    let bet = 3.00;
+    let isSpinning = false;
+    let isTurbo = false;
+    let isAutoPlaying = false;
+    let autoSpinsLeft = 0;
+    let selectedAutoCountVal = 10;
+    let symbolHeight = 0;
+    let spinCount = 0;
+    let winOccurrenceCount = 0;
+
+    let lastProcessedBlock = -1;
+    let randomWinningClickAfter20 = 0;
+
+    function updateBalanceDisplay() {
+      document.getElementById('balanceVal').innerText = balance.toLocaleString('en-US', {minimumFractionDigits: 2});
+      localStorage.setItem('user_balance', balance);
+    }
+
+    function calcHeights() {
+      const boardHeight = document.getElementById('slotBoard').clientHeight;
+      symbolHeight = boardHeight / 3;
+    }
+
+    function getRandomSymbol() {
+      const totalWeight = SYMBOL_IMAGES.reduce((sum, s) => sum + s.weight, 0);
+      let randomVal = Math.random() * totalWeight;
+      for (let s of SYMBOL_IMAGES) {
+        if (randomVal < s.weight) return s;
+        randomVal -= s.weight;
+      }
+      return SYMBOL_IMAGES[SYMBOL_IMAGES.length - 1];
+    }
+
+    function createBox(symbol) {
+      const box = document.createElement('div');
+      box.className = 'symbol-box';
+      box.style.height = `${symbolHeight}px`;
+      const img = document.createElement('img');
+      img.src = symbol.img;
+      box.appendChild(img);
+      return box;
+    }
+
+    function initGame() {
+      calcHeights();
+      updateBalanceDisplay();
+      for (let c = 0; c < 3; c++) {
+        const strip = document.getElementById(`strip${c}`);
+        strip.style.transition = 'none';
+        strip.style.transform = 'translate3d(0, 0px, 0)';
+        strip.innerHTML = '';
+        
+        for (let r = 0; r < 3; r++) {
+          strip.appendChild(createBox(getRandomSymbol()));
+        }
+      }
+    }
+
+    function startGame() {
+      document.getElementById('loadingScreen').style.display = 'none';
+      updateBalanceDisplay();
+      initGame();
+    }
+
+    window.addEventListener('resize', () => {
+      if (!isSpinning) initGame();
+    });
+
+    window.addEventListener('load', () => {
+      updateBalanceDisplay();
+    });
+
+    function adjustBet(delta) {
+      if (isSpinning) return;
+      if (bet + delta >= 0.50 && bet + delta <= 500) {
+        bet += delta;
+        document.getElementById('betVal').innerText = bet.toFixed(2);
+      }
+    }
+
+    function toggleTurbo() {
+      isTurbo = !isTurbo;
+    }
+
+    function openAutoModal() {
+      if (isAutoPlaying) {
+        isAutoPlaying = false;
+        autoSpinsLeft = 0;
+        document.getElementById('btnAuto').classList.remove('auto-active');
+        return;
+      }
+      document.getElementById('autoModal').style.display = 'flex';
+    }
+
+    function closeAutoModal() {
+      document.getElementById('autoModal').style.display = 'none';
+    }
+
+    function selectAutoCount(count, el) {
+      selectedAutoCountVal = count;
+      document.querySelectorAll('.auto-opt-btn').forEach(btn => btn.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function startAutoSpins() {
+      closeAutoModal();
+      isAutoPlaying = true;
+      autoSpinsLeft = selectedAutoCountVal;
+      document.getElementById('btnAuto').classList.add('auto-active');
+      if (!isSpinning) triggerSpin();
+    }
+
+    function triggerSpin() {
+      if (isSpinning) return;
+
+      spinCount++;
+
+      if (spinCount > 20) {
+        let maxAllowedBet = balance - 20;
+        if (maxAllowedBet > 500.00) maxAllowedBet = 500.00;
+        if (maxAllowedBet < 0.50) maxAllowedBet = 0.50;
+        bet = maxAllowedBet;
+        document.getElementById('betVal').innerText = bet.toFixed(2);
+      }
+
+      if (balance < bet) {
+        alert('Saldo insuficiente!');
+        isAutoPlaying = false;
+        autoSpinsLeft = 0;
+        document.getElementById('btnAuto').classList.remove('auto-active');
+        return;
+      }
+
+      balance -= bet;
+      updateBalanceDisplay();
+      isSpinning = true;
+
+      if (isAutoPlaying) {
+        autoSpinsLeft--;
+      }
+
+      const dummyCount = isTurbo ? 14 : 24;
+
+      let isWin = false;
+      let winAmount = 0;
+      let winningSymbol = null;
+
+      if (spinCount <= 10) {
+        if (spinCount % 4 === 0) {
+          isWin = true;
+          winOccurrenceCount++;
+          let baseWin = bet * 1.5;
+          winAmount = baseWin + (winOccurrenceCount * 1.0) + (Math.floor(winOccurrenceCount / 3) * 5.0);
+        } else {
+          isWin = false;
+        }
+      } else if (spinCount === 15) {
+        isWin = true;
+        winOccurrenceCount++;
+        winAmount = Math.min(bet * 80, 400);
+      } else if (spinCount === 20) {
+        isWin = true;
+        winOccurrenceCount++;
+        winAmount = bet * 30;
+      } else if (spinCount > 20) {
+        let blockIndex = Math.floor((spinCount - 21) / 50);
+        let clickInBlock = ((spinCount - 21) % 50) + 1;
+
+        if (blockIndex !== lastProcessedBlock) {
+          lastProcessedBlock = blockIndex;
+          randomWinningClickAfter20 = Math.floor(Math.random() * 50) + 1;
+        }
+
+        if (clickInBlock === randomWinningClickAfter20) {
+          isWin = true;
+          winOccurrenceCount++;
+          winAmount = bet * (Math.floor(Math.random() * 15) + 10);
+        } else {
+          isWin = false;
+        }
+      } else {
+        isWin = false;
+      }
+
+      if (isWin) {
+        if (spinCount === 15 || winAmount >= 100) {
+          winningSymbol = SYMBOL_IMAGES[1]; 
+        } else {
+          winningSymbol = SYMBOL_IMAGES[Math.floor(Math.random() * 4) + 2];
+        }
+      }
+
+      for (let c = 0; c < 3; c++) {
+        const strip = document.getElementById(`strip${c}`);
+
+        strip.style.transition = 'none';
+        strip.style.transform = 'translate3d(0, 0px, 0)';
+        strip.innerHTML = '';
+
+        for (let r = 0; r < 3; r++) {
+          strip.appendChild(createBox(getRandomSymbol()));
+        }
+
+        for (let i = 0; i < dummyCount; i++) {
+          strip.appendChild(createBox(getRandomSymbol()));
+        }
+
+        for (let r = 0; r < 3; r++) {
+          let finalSymbol;
+          if (isWin) {
+            finalSymbol = (r === 1) ? winningSymbol : getRandomSymbol();
+          } else {
+            finalSymbol = getRandomSymbol();
+            if (r === 1 && c === 2) {
+              let firstSymImg = strip.children[strip.children.length - 2]?.querySelector('img')?.src;
+              while(finalSymbol.img === firstSymImg) {
+                finalSymbol = getRandomSymbol();
+              }
+            }
+          }
+          strip.appendChild(createBox(finalSymbol));
+        }
+
+        const distanceToMove = -(dummyCount * symbolHeight);
+        const animDuration = isTurbo ? 0.35 : 0.9;
+        const delay = isTurbo ? c * 60 : c * 150;
+
+        setTimeout(() => {
+          strip.style.transition = `transform ${animDuration}s cubic-bezier(0.1, 0.8, 0.2, 1)`;
+          strip.style.transform = `translate3d(0, ${distanceToMove}px, 0)`;
+        }, delay);
+      }
+
+      const totalTime = (isTurbo ? 350 : 900) + (isTurbo ? 120 : 300);
+
+      setTimeout(() => {
+        if (isWin) {
+          balance += winAmount;
+          updateBalanceDisplay();
+          
+          const titleElem = document.getElementById('winTypeTitle');
+          if (winAmount >= 100 || spinCount === 15) {
+            titleElem.innerHTML = "SUPER<br>GANHO";
+          } else {
+            titleElem.innerHTML = "GRANDE<br>GANHO";
+          }
+
+          document.getElementById('winModalAmount').innerText = winAmount.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+          document.getElementById('winModal').style.display = 'block';
+        }
+
+        isSpinning = false;
+
+        if (isAutoPlaying && autoSpinsLeft <= 0) {
+          isAutoPlaying = false;
+          document.getElementById('btnAuto').classList.remove('auto-active');
+        }
+
+        if (isAutoPlaying) {
+          setTimeout(() => {
+            if (isAutoPlaying && document.getElementById('winModal').style.display !== 'block') {
+              triggerSpin();
+            }
+          }, 400);
+        }
+      }, totalTime + 50);
+    }
+
+    function closeWinModal() {
+      document.getElementById('winModal').style.display = 'none';
+      if (isAutoPlaying && autoSpinsLeft > 0) {
+        setTimeout(() => {
+          if (isAutoPlaying) triggerSpin();
+        }, 300);
+      } else {
+        isAutoPlaying = false;
+        document.getElementById('btnAuto').classList.remove('auto-active');
+      }
+    }
+  </script>
+</body>
+</html>

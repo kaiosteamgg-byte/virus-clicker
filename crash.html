@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WillBet - Crash (Foguete)</title>
+  <!-- Ícones Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --bg-dark: #09090b;
+      --bg-card: #121214;
+      --bg-hover: #222226;
+      --primary: #f4f4f5;
+      --primary-hover: #e4e4e7;
+      --accent: #71717a;
+      --text-main: #fafafa;
+      --text-muted: #a1a1aa;
+      --border-color: #27272a;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* CABEÇALHO */
+    header {
+      height: 70px;
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-back {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-back:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .wallet-box {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .wallet-box span {
+      color: var(--primary);
+    }
+
+    /* CONTEÚDO DO JOGO */
+    .game-container {
+      flex: 1;
+      max-width: 1000px;
+      width: 100%;
+      margin: 20px auto;
+      padding: 0 15px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+
+    @media (max-width: 850px) {
+      .game-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* TELA DO FOGUETE */
+    .screen-area {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      height: 420px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .history-bar {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .history-pill {
+      background-color: rgba(255,255,255,0.08);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .rocket-display {
+      text-align: center;
+      z-index: 5;
+    }
+
+    .multiplier-text {
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin-bottom: 5px;
+    }
+
+    .status-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .rocket-icon {
+      font-size: 3.5rem;
+      position: absolute;
+      transition: transform 0.05s linear;
+      bottom: 40px;
+      left: 40px;
+      z-index: 6;
+    }
+
+    /* PAINEL DE CONTROLE DE APOSTAS */
+    .control-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bet-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .bet-input {
+      width: 100%;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 12px 15px;
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .quick-btns {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-quick {
+      flex: 1;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-quick:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .btn-bet {
+      background-color: var(--primary);
+      color: #000;
+    }
+
+    .btn-bet:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-cashout {
+      background-color: var(--success);
+      color: #000;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-cashout:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="header-left">
+      <a href="index.html" class="btn-back">
+        <i data-lucide="arrow-left" style="width: 18px;"></i> Voltar ao Lobby
+      </a>
+      <a href="bet.html" class="logo">Will<span style="color: var(--text-muted);">Bet</span></a>
+    </div>
+    
+    <div class="wallet-box">
+      <i data-lucide="wallet" style="width: 18px;"></i>
+      <span id="wallet-balance">R$ 1.250,00</span>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO DO JOGO -->
+  <div class="game-container">
+    
+    <!-- TELA DO JOGO (FOGUETE + RASTRO) -->
+    <div class="screen-area">
+      <!-- Histórico recente -->
+      <div class="history-bar" id="historyBar">
+        <div class="history-pill">1.42x</div>
+        <div class="history-pill">2.10x</div>
+        <div class="history-pill">1.05x</div>
+      </div>
+
+      <!-- Rastro SVG do Foguete -->
+      <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none;">
+        <path id="rocketTrail" d="M 50 380 L 50 380" stroke="var(--primary)" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+
+      <div class="rocket-icon" id="rocketIcon">🚀</div>
+
+      <div class="rocket-display">
+        <div class="multiplier-text" id="multiplierText">1.00x</div>
+        <div class="status-text" id="statusText">Aguardando Próxima Rodada...</div>
+      </div>
+    </div>
+
+    <!-- PAINEL DE CONTROLE -->
+    <div class="control-panel">
+      <div class="input-group">
+        <div class="input-label">
+          <span>Valor da Aposta</span>
+          <span id="maxBalanceLabel">Saldo disponível</span>
+        </div>
+        <div class="bet-input-wrapper">
+          <input type="number" id="betAmount" class="bet-input" value="10.00" min="1" step="1">
+        </div>
+        <div class="quick-btns">
+          <button class="btn-quick" onclick="setBet(10)">R$ 10</button>
+          <button class="btn-quick" onclick="setBet(50)">R$ 50</button>
+          <button class="btn-quick" onclick="setBet(100)">R$ 100</button>
+          <button class="btn-quick" onclick="setMaxBet()">MAX</button>
+        </div>
+      </div>
+
+      <button id="actionBtn" class="btn-action btn-bet" onclick="handleGameAction()">Fazer Aposta</button>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // --- SISTEMA DE SALDO ---
+    let balance = parseFloat(localStorage.getItem('user_balance')) || 1250.00;
+
+    function updateBalanceUI() {
+      const balanceEl = document.getElementById('wallet-balance');
+      balanceEl.innerText = 'R$ ' + balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      localStorage.setItem('user_balance', balance);
+    }
+    updateBalanceUI();
+
+    function setBet(val) {
+      document.getElementById('betAmount').value = val.toFixed(2);
+    }
+
+    function setMaxBet() {
+      document.getElementById('betAmount').value = balance.toFixed(2);
+    }
+
+    // --- LÓGICA DO JOGO CRASH COM RASTRO E BOTÃO DE PARAR ---
+    let gameState = 'IDLE'; // IDLE, PLAYING, CASHED_OUT, CRASHED
+    let currentMultiplier = 1.00;
+    let crashPoint = 1.00;
+    let gameInterval = null;
+    let activeBet = 0;
+    let history = [1.42, 2.10, 1.05];
+
+    const multiplierText = document.getElementById('multiplierText');
+    const statusText = document.getElementById('statusText');
+    const actionBtn = document.getElementById('actionBtn');
+    const betInput = document.getElementById('betAmount');
+    const rocketIcon = document.getElementById('rocketIcon');
+    const rocketTrail = document.getElementById('rocketTrail');
+    const historyBar = document.getElementById('historyBar');
+
+    const startX = 50;
+    const startY = 380;
+
+    function updateHistoryUI() {
+      historyBar.innerHTML = history.slice(-4).reverse().map(h => `<div class="history-pill" style="color: ${h >= 2 ? 'var(--success)' : 'var(--text-main)'};">${h.toFixed(2)}x</div>`).join('');
+    }
+    updateHistoryUI();
+
+    function handleGameAction() {
+      if (gameState === 'IDLE') {
+        const val = parseFloat(betInput.value);
+        if (isNaN(val) || val <= 0) {
+          alert('Insira um valor de aposta válido.');
+          return;
+        }
+        if (val > balance) {
+          alert('Saldo insuficiente!');
+          return;
+        }
+
+        activeBet = val;
+        balance -= activeBet;
+        updateBalanceUI();
+
+        startGame();
+      } else if (gameState === 'PLAYING') {
+        cashOut();
+      }
+    }
+
+    function startGame() {
+      gameState = 'PLAYING';
+      currentMultiplier = 1.00;
+      
+      let rand = Math.random();
+      if (rand < 0.05) {
+        crashPoint = 1.00;
+      } else {
+        crashPoint = parseFloat((1.01 + (Math.random() * Math.random() * 16)).toFixed(2));
+      }
+
+      actionBtn.className = 'btn-action btn-cashout';
+      betInput.disabled = true;
+      statusText.innerText = 'Foguete subindo...';
+      statusText.style.color = 'var(--success)';
+
+      let speed = 40;
+      gameInterval = setInterval(() => {
+        currentMultiplier += 0.02 * (currentMultiplier * 0.35 + 0.5);
+
+        if (currentMultiplier >= crashPoint) {
+          currentMultiplier = crashPoint;
+          crashGame();
+        }
+
+        multiplierText.innerText = currentMultiplier.toFixed(2) + 'x';
+        
+        // Posição proporcional do foguete
+        let posX = Math.min(360, (currentMultiplier - 1) * 45);
+        let posY = Math.min(260, (currentMultiplier - 1) * 35);
+        
+        rocketIcon.style.transform = `translate(${posX}px, -${posY}px) rotate(15deg)`;
+
+        // Atualiza o rastro SVG conectando o início até a posição atual
+        let currX = startX + posX;
+        let currY = startY - posY;
+        rocketTrail.setAttribute('d', `M ${startX} ${startY} L ${currX} ${currY}`);
+
+        if (gameState === 'PLAYING') {
+          let potentialWin = (activeBet * currentMultiplier).toFixed(2);
+          actionBtn.innerHTML = `🛑 PARAR E RECEBER<br><span style="font-size: 0.85rem; font-weight: normal;">R$ ${potentialWin}</span>`;
+        }
+      }, speed);
+    }
+
+    function cashOut() {
+      if (gameState !== 'PLAYING') return;
+      clearInterval(gameInterval);
+      gameState = 'CASHED_OUT';
+
+      let winAmount = activeBet * currentMultiplier;
+      balance += winAmount;
+      updateBalanceUI();
+
+      statusText.innerText = `Resgatado com sucesso! +R$ ${(winAmount - activeBet).toFixed(2)}`;
+      statusText.style.color = 'var(--success)';
+      multiplierText.style.color = 'var(--success)';
+
+      history.push(currentMultiplier);
+      updateHistoryUI();
+
+      actionBtn.innerText = 'Resgatado!';
+      actionBtn.className = 'btn-action btn-bet';
+      actionBtn.disabled = true;
+
+      setTimeout(resetToIdle, 3000);
+    }
+
+    function crashGame() {
+      clearInterval(gameInterval);
+      gameState = 'CRASHED';
+
+      statusText.innerText = `Foguete Explodiu em ${currentMultiplier.toFixed(2)}x!`;
+      statusText.style.color = 'var(--danger)';
+      multiplierText.style.color = 'var(--danger)';
+
+      history.push(currentMultiplier);
+      updateHistoryUI();
+
+      actionBtn.innerText = 'Foguete Caiu';
+      actionBtn.className = 'btn-action btn-bet';
+      actionBtn.disabled = true;
+
+      setTimeout(resetToIdle, 3000);
+    }
+
+    function resetToIdle() {
+      gameState = 'IDLE';
+      currentMultiplier = 1.00;
+      multiplierText.innerText = '1.00x';
+      multiplierText.style.color = 'var(--text-main)';
+      statusText.innerText = 'Aguardando Próxima Rodada...';
+      statusText.style.color = 'var(--text-muted)';
+      actionBtn.innerText = 'Fazer Aposta';
+      actionBtn.className = 'btn-action btn-bet';
+      actionBtn.disabled = false;
+      betInput.disabled = false;
+      
+      rocketIcon.style.transform = `translate(0px, 0px) rotate(0deg)`;
+      rocketTrail.setAttribute('d', `M ${startX} ${startY} L ${startX} ${startY}`);
+    }
+  </script>
+</body>
+</html>

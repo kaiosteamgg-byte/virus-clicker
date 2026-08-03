@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Fortune Rabbit</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka One', cursive, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #0b0202;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .game-screen {
+      width: 100vw;
+      max-width: 414px;
+      height: 100vh;
+      max-height: 896px;
+      background: url('assets/rabbit/fundo-coelho.png') no-repeat center center;
+      background-size: 100% 100%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,0,0,0.9);
+      border: 2px solid #5a1219;
+    }
+
+    /* ÁREA DA ROLETA (3-4-3) */
+    .slot-board {
+      position: absolute;
+      top: 22.5%;
+      left: 15.5%;
+      width: 69%;
+      height: 45%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      background: transparent;
+    }
+
+    .reel-col {
+      width: 31%;
+      height: 75%;
+      overflow: hidden;
+      position: relative;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .reel-col:first-child {
+      transform: translateX(-20px);
+      top: 0px;
+    }
+
+    .reel-col:last-child {
+      transform: translateX(20px);
+      top: 0px;
+    }
+
+    .reel-col.middle {
+      width: 32.5%;
+      height: 100%;
+      transform: none !important;
+    }
+
+    .reel-strip {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      will-change: transform;
+      transform: translate3d(0, 0, 0);
+      background: transparent;
+      align-items: center;
+    }
+
+    .symbol-box {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 2px;
+      background: transparent;
+    }
+
+    .symbol-box img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+      margin: auto;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7));
+    }
+
+    /* CONTROLES E TEXTOS SOBREPOSTOS NA ARTE DA PARTE INFERIOR */
+    .balance-overlay {
+      position: absolute;
+      top: 77.5%;
+      left: 9%;
+      width: 30%;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #ffeb82;
+      font-weight: bold;
+      z-index: 20;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      background-color: #0b0404;
+      border-radius: 30px;
+      padding: 10px 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
+    }
+
+    .bet-overlay {
+      position: absolute;
+      top: 77.5%;
+      right: 9%;
+      width: 30%;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #ffeb82;
+      font-weight: bold;
+      z-index: 20;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      background-color: #0b0404;
+      border-radius: 30px;
+      padding: 10px 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.9);
+    }
+
+    /* BOTÕES INFERIORES INVISÍVEIS */
+    .btn-turbo-overlay {
+      position: absolute;
+      bottom: 8.5%;    
+      left: 6%;      
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent; 
+      border: none;     
+    }
+
+    .btn-minus-overlay {
+      position: absolute;
+      bottom: 8.5%;    
+      left: 23%;     
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      border: none;
+    }
+
+    /* BOTÃO DE GIRAR COM ANIMAÇÃO DE PULSO/BRILHO */
+    .spin-click-area {
+      position: absolute;
+      bottom: 1.5%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      border: none;
+    }
+
+    .spin-click-area::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0.7);
+      background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(110,240,140,0.7) 45%, rgba(0,0,0,0) 75%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .spin-click-area.clicked::after {
+      animation: spinPulse 0.35s ease-out;
+    }
+
+    @keyframes spinPulse {
+      0% {
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.35);
+        opacity: 0;
+      }
+    }
+
+    .btn-plus-overlay {
+      position: absolute;
+      bottom: 8.5%;    
+      right: 23%;     
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      border: none;
+    }
+
+    .btn-auto-overlay {
+      position: absolute;
+      bottom: 8.5%;    
+      right: 6%;     
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 30;
+      background: transparent;
+      border: none;
+    }
+
+    /* BOTÃO VOLTAR AO LOBBY */
+    .btn-back-lobby {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #5a1219;
+      color: #ffeb82;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      z-index: 100;
+      text-decoration: none;
+    }
+
+    .btn-back-lobby:hover {
+      background: rgba(90, 18, 25, 0.8);
+    }
+
+    /* TELA DE SUPER GANHO TELA INTEIRA COM ANIMAÇÃO DE SALTO E CONTADOR */
+    .win-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none; 
+      z-index: 150;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .win-content {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .win-animated-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: bounceCoelho 1s ease-in-out infinite alternate;
+    }
+
+    .win-img {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: fill;
+    }
+
+    .win-text-overlay {
+      position: absolute;
+      top: 54%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .win-title {
+      font-size: 2.3rem;
+      color: #38f8ff;
+      -webkit-text-stroke: 1.5px #003366;
+      text-shadow: 0 0 12px rgba(56, 248, 255, 0.9), 0 3px 6px rgba(0,0,0,0.9);
+      margin-bottom: -4px;
+    }
+
+    .win-val-container {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .win-currency, .win-val {
+      font-size: 3rem;
+      color: #ffea00;
+      -webkit-text-stroke: 1.5px #78350f;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.9), 0 0 15px rgba(255, 234, 0, 0.8);
+    }
+
+    @keyframes bounceCoelho {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-12px); }
+    }
+
+    /* MENU AUTO SPIN EXATO */
+    .auto-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      z-index: 150;
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+
+    .auto-sheet {
+      width: 100%;
+      background: #15151b;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      border-top: 1px solid #32323e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.85);
+      animation: slideUpSheet 0.25s ease-out;
+    }
+
+    @keyframes slideUpSheet {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .auto-header {
+      position: relative;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.15rem;
+      color: #ffffff;
+      border-bottom: 1px solid #23232c;
+      font-family: 'Fredoka One', cursive, sans-serif;
+    }
+
+    .auto-close {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 1.4rem;
+      color: #8c8c9a;
+    }
+
+    .auto-close:hover {
+      color: #fff;
+    }
+
+    .auto-body {
+      padding: 22px 20px 24px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auto-label {
+      font-size: 0.85rem;
+      color: #8c8c9a;
+      margin-bottom: 14px;
+      font-family: 'Fredoka One', cursive, sans-serif;
+    }
+
+    .auto-options {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .auto-opt {
+      flex: 1;
+      background: #21212c;
+      border: 1px solid #30303e;
+      border-radius: 22px;
+      padding: 10px 0;
+      color: #8c8c9a;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: center;
+      font-family: 'Fredoka One', cursive, sans-serif;
+      transition: all 0.2s;
+    }
+
+    .auto-opt.active {
+      background: #b89063;
+      color: #ffffff;
+      border-color: #dcb17c;
+      box-shadow: 0 0 10px rgba(184, 144, 99, 0.4);
+    }
+
+    .auto-start-btn {
+      width: 100%;
+      background: linear-gradient(to bottom, #ffbe5e, #f1821e);
+      border: none;
+      border-radius: 28px;
+      padding: 14px 0;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      font-family: 'Fredoka One', cursive, sans-serif;
+      box-shadow: 0 4px 15px rgba(241, 130, 30, 0.45);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+
+    .auto-start-btn:active {
+      transform: scale(0.98);
+    }
+
+    .auto-footer-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      background: #0f0f14;
+      padding: 10px 16px;
+      border-top: 1px solid #23232c;
+    }
+
+    .auto-footer-item {
+      flex: 1;
+      background: #181820;
+      border: 1px solid #2c2c38;
+      border-radius: 20px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: #ffeb82;
+    }
+
+    .auto-footer-item.win-box {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .auto-footer-item.win-box .win-label-small {
+      font-size: 0.55rem;
+      color: #8c8c9a;
+      letter-spacing: 1px;
+    }
+
+    .auto-footer-item.win-box .win-val-small {
+      font-size: 0.88rem;
+      color: #ffeb82;
+    }
+  </style>
+
+  <!-- PROTEÇÃO ANTI-INSPEÇÃO E F12 -->
+  <script>
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.ctrlKey && ['U', 'u'].includes(e.key)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    });
+
+    (function () {
+      const threshold = 160;
+      const checkDevTools = function () {
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+        if (widthThreshold || heightThreshold) {
+          document.body.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0b0b0b; color: #ff3333; font-family: sans-serif; font-size: 22px; text-align: center; padding: 20px;">
+              Acesso Restrito: Ferramentas de Desenvolvedor detectadas!
+            </div>`;
+        }
+      };
+      window.addEventListener('resize', checkDevTools);
+      setInterval(checkDevTools, 1000);
+    })();
+  </script>
+</head>
+<body>
+
+  <div class="game-screen">
+    <!-- Botão para voltar ao Lobby Principal -->
+    <a href="index.html" class="btn-back-lobby">← Voltar ao Lobby</a>
+
+    <!-- TAMBORES 3-4-3 -->
+    <div class="slot-board" id="slotBoard">
+      <div class="reel-col" data-rows="3"><div class="reel-strip" id="strip0"></div></div>
+      <div class="reel-col middle" data-rows="4"><div class="reel-strip" id="strip1"></div></div>
+      <div class="reel-col" data-rows="3"><div class="reel-strip" id="strip2"></div></div>
+    </div>
+
+    <!-- VALORES DINÂMICOS SOBREPOSTOS -->
+    <div class="balance-overlay" id="balanceVal">0,00</div>
+    <div class="bet-overlay" id="betVal">5.00</div>
+
+    <!-- BOTÕES INFERIORES INVISÍVEIS -->
+    <div class="btn-turbo-overlay" id="turboBtn" onclick="toggleTurbo()" title="Modo Turbo"></div>
+    <div class="btn-minus-overlay" onclick="adjustBet(-1)" title="Diminuir Aposta"></div>
+    <div class="spin-click-area" id="spinBtn" onclick="handleSpinClick()" title="Girar"></div>
+    <div class="btn-plus-overlay" onclick="adjustBet(1)" title="Aumentar Aposta"></div>
+    <div class="btn-auto-overlay" onclick="openAutoModal()" title="Auto Girar"></div>
+
+    <!-- MENU AUTO SPIN EXATO -->
+    <div class="auto-modal" id="autoSpinModal">
+      <div class="auto-sheet">
+        <div class="auto-header">
+          <span>Auto Spin</span>
+          <span class="auto-close" onclick="closeAutoModal()">&times;</span>
+        </div>
+        <div class="auto-body">
+          <div class="auto-label">Number of Auto Spins</div>
+          <div class="auto-options">
+            <button class="auto-opt active" onclick="selectAutoCount(10, this)">10</button>
+            <button class="auto-opt" onclick="selectAutoCount(30, this)">30</button>
+            <button class="auto-opt" onclick="selectAutoCount(50, this)">50</button>
+            <button class="auto-opt" onclick="selectAutoCount(80, this)">80</button>
+            <button class="auto-opt" onclick="selectAutoCount(1000, this)">1000</button>
+          </div>
+          <button class="auto-start-btn" onclick="startAutoSpins()">Start</button>
+        </div>
+        <div class="auto-footer-bar">
+          <div class="auto-footer-item" id="autoModalBalance">0,00</div>
+          <div class="auto-footer-item win-box">
+            <span class="win-label-small">WIN</span>
+            <span class="win-val-small" id="autoModalWin">1.80</span>
+          </div>
+          <div class="auto-footer-item" id="autoModalBet">5.00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TELA DE SUPER GANHO TELA INTEIRA COM ANIMAÇÃO DE SALTO E CONTADOR -->
+    <div class="win-modal" id="winModal" onclick="closeWinModal()">
+      <div class="win-content">
+        <div class="win-animated-wrap">
+          <img src="assets/rabbit/win-rabbit-background.png" alt="Super Ganho" class="win-img">
+          <div class="win-text-overlay">
+            <div class="win-title" id="winModalTitle">SUPER GANHO!</div>
+            <div class="win-val-container">
+              <span class="win-currency">R$</span>
+              <span class="win-val" id="winModalAmount">0,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SYMBOLS = [
+      { img: 'assets/rabbit/wild coelho.png', val: 100 },
+      { img: 'assets/rabbit/envelope coelho.png', val: 25 },
+      { img: 'assets/rabbit/pote.png', val: 50 },
+      { img: 'assets/rabbit/fogos.png', val: 10 },
+      { img: 'assets/rabbit/moedas.png', val: 5 },
+      { img: 'assets/rabbit/cenoura.png', val: 2 },
+      { img: 'assets/rabbit/simbolo-100.png', val: 100 },
+      { img: 'assets/rabbit/simbolo-150.png', val: 150 },
+      { img: 'assets/rabbit/simbolo-25.png', val: 25 }
+    ];
+
+    // Pega o saldo salvo no navegador (localStorage) sincronizado com o lobby principal
+    let balance = parseFloat(localStorage.getItem('user_balance')) || 1250.00;
+    let bet = 5.00;
+    let lastWin = 1.80;
+    let isSpinning = false;
+    let rowHeights = [0, 0, 0];
+    let spinCount = 0;
+    let winOccurrenceCount = 0;
+    let turboMode = false;
+    
+    let isAutoPlaying = false;
+    let selectedAutoCount = 10;
+    let autoSpinsRemaining = 0;
+
+    let lastProcessedBlock = -1;
+    let randomWinningClickAfter20 = 0;
+
+    function calcHeights() {
+      const cols = document.querySelectorAll('.reel-col');
+      cols.forEach((col, idx) => {
+        const rows = parseInt(col.getAttribute('data-rows'));
+        rowHeights[idx] = col.clientHeight / rows;
+      });
+    }
+
+    function getRandomSymbol() {
+      return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    }
+
+    function createBox(symbol, height) {
+      const box = document.createElement('div');
+      box.className = 'symbol-box';
+      box.style.height = `${height}px`;
+      box.innerHTML = `<img src="${symbol.img}" alt="Símbolo">`;
+      return box;
+    }
+
+    function initGame() {
+      calcHeights();
+      for (let c = 0; c < 3; c++) {
+        const strip = document.getElementById(`strip${c}`);
+        strip.style.transition = 'none';
+        strip.style.transform = 'translate3d(0, 0px, 0)';
+        strip.innerHTML = '';
+        
+        const rows = (c === 1) ? 4 : 3;
+        for (let r = 0; r < rows; r++) {
+          strip.appendChild(createBox(getRandomSymbol(), rowHeights[c]));
+        }
+      }
+      updateDisplays();
+    }
+
+    window.addEventListener('load', initGame);
+    window.addEventListener('resize', () => { if (!isSpinning) initGame(); });
+
+    function updateDisplays() {
+      const balStr = balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      const betStr = bet.toFixed(2);
+      const winStr = lastWin.toFixed(2);
+
+      document.getElementById('balanceVal').innerText = balStr;
+      document.getElementById('betVal').innerText = betStr;
+
+      document.getElementById('autoModalBalance').innerText = balStr;
+      document.getElementById('autoModalBet').innerText = betStr;
+      document.getElementById('autoModalWin').innerText = winStr;
+
+      // Salva de forma persistente para atualizar o saldo no lobby principal também
+      localStorage.setItem('user_balance', balance);
+    }
+
+    function adjustBet(delta) {
+      if (isSpinning) return;
+      if (bet + delta >= 1.00 && bet + delta <= 500) {
+        bet += delta;
+        updateDisplays();
+      }
+    }
+
+    function toggleTurbo() {
+      turboMode = !turboMode;
+      const btn = document.getElementById('turboBtn');
+      if (turboMode) {
+        btn.style.boxShadow = '0 0 10px #ffeb82';
+        btn.style.border = '2px solid #ffeb82';
+      } else {
+        btn.style.boxShadow = 'none';
+        btn.style.border = 'none';
+      }
+    }
+
+    function openAutoModal() {
+      if (isAutoPlaying) {
+        stopAutoPlay();
+        return;
+      }
+      updateDisplays();
+      document.getElementById('autoSpinModal').style.display = 'flex';
+    }
+
+    function closeAutoModal() {
+      document.getElementById('autoSpinModal').style.display = 'none';
+    }
+
+    function selectAutoCount(count, el) {
+      selectedAutoCount = count;
+      document.querySelectorAll('.auto-opt').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function startAutoSpins() {
+      closeAutoModal();
+      autoSpinsRemaining = selectedAutoCount;
+      isAutoPlaying = true;
+      const btn = document.querySelector('.btn-auto-overlay');
+      btn.style.boxShadow = '0 0 10px #ffeb82';
+      btn.style.border = '2px solid #ffeb82';
+      
+      if (!isSpinning) {
+        triggerSpin();
+      }
+    }
+
+    function stopAutoPlay() {
+      isAutoPlaying = false;
+      autoSpinsRemaining = 0;
+      const btn = document.querySelector('.btn-auto-overlay');
+      btn.style.boxShadow = 'none';
+      btn.style.border = 'none';
+    }
+
+    function handleSpinClick() {
+      const btn = document.getElementById('spinBtn');
+      btn.classList.add('clicked');
+      setTimeout(() => {
+        btn.classList.remove('clicked');
+      }, 350);
+      triggerSpin();
+    }
+
+    function animateWinCounter(targetValue, duration = 1500) {
+      const element = document.getElementById('winModalAmount');
+      let startTime = null;
+
+      function update(currentTime) {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 4);
+        const currentVal = easeProgress * targetValue;
+
+        element.innerText = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.innerText = targetValue.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    function triggerSpin() {
+      if (isSpinning) return;
+
+      spinCount++;
+
+      // REGRA: Após o 20º clique, a aposta passa a ser o saldo atual menos 20 reais
+      if (spinCount > 20) {
+        let newBet = balance - 20;
+        if (newBet < 1.00) newBet = 1.00;
+        if (newBet > 500.00) newBet = 500.00;
+        bet = newBet;
+      }
+
+      if (balance < bet) {
+        alert('Saldo insuficiente!');
+        stopAutoPlay();
+        return;
+      }
+
+      balance -= bet;
+      updateDisplays();
+      isSpinning = true;
+
+      const dummyCount = 16;
+      let isWin = false;
+      let calculatedWin = 0;
+
+      if (spinCount <= 10) {
+        if (spinCount % 4 === 0) {
+          isWin = true;
+          winOccurrenceCount++;
+          let baseWin = bet * 1.5;
+          calculatedWin = baseWin + (winOccurrenceCount * 1.0) + (Math.floor(winOccurrenceCount / 3) * 5.0);
+        } else {
+          isWin = false;
+        }
+      } else if (spinCount === 15) {
+        isWin = true;
+        winOccurrenceCount++;
+        calculatedWin = Math.min(bet * 80, 400); 
+      } else if (spinCount === 20) {
+        isWin = true;
+        winOccurrenceCount++;
+        calculatedWin = bet * 30; 
+      } else if (spinCount > 20) {
+        let blockIndex = Math.floor((spinCount - 21) / 50);
+        let clickInBlock = ((spinCount - 21) % 50) + 1;
+
+        if (blockIndex !== lastProcessedBlock) {
+          lastProcessedBlock = blockIndex;
+          randomWinningClickAfter20 = Math.floor(Math.random() * 50) + 1;
+        }
+
+        if (clickInBlock === randomWinningClickAfter20) {
+          isWin = true;
+          winOccurrenceCount++;
+          calculatedWin = bet * (Math.floor(Math.random() * 15) + 10);
+        } else {
+          isWin = false;
+        }
+      } else {
+        isWin = false;
+      }
+
+      for (let c = 0; c < 3; c++) {
+        const strip = document.getElementById(`strip${c}`);
+        const rows = (c === 1) ? 4 : 3;
+        const h = rowHeights[c];
+
+        strip.style.transition = 'none';
+        strip.style.transform = 'translate3d(0, 0px, 0)';
+        strip.innerHTML = '';
+
+        for (let r = 0; r < rows; r++) strip.appendChild(createBox(getRandomSymbol(), h));
+        for (let i = 0; i < dummyCount; i++) strip.appendChild(createBox(getRandomSymbol(), h));
+        for (let r = 0; r < rows; r++) strip.appendChild(createBox(getRandomSymbol(), h));
+
+        const distanceToMove = -(dummyCount * h);
+        const animDuration = turboMode ? 0.25 : 0.65;
+
+        setTimeout(() => {
+          strip.style.transition = `transform ${animDuration}s cubic-bezier(0.1, 0.8, 0.2, 1)`;
+          strip.style.transform = `translate3d(0, ${distanceToMove}px, 0)`;
+        }, c * (turboMode ? 30 : 80));
+      }
+
+      setTimeout(() => {
+        if (isWin) {
+          const maxCeiling = bet * 5000;
+          if (calculatedWin > maxCeiling) calculatedWin = maxCeiling;
+
+          lastWin = calculatedWin;
+          balance += lastWin;
+          updateDisplays();
+
+          document.getElementById('winModal').style.display = 'flex';
+          animateWinCounter(lastWin, 1500);
+          stopAutoPlay();
+        } else {
+          lastWin = 0.00;
+          updateDisplays();
+        }
+        isSpinning = false;
+
+        if (isAutoPlaying) {
+          autoSpinsRemaining--;
+          if (autoSpinsRemaining > 0) {
+            setTimeout(() => {
+              if (isAutoPlaying && !isSpinning) {
+                triggerSpin();
+              }
+            }, turboMode ? 400 : 800);
+          } else {
+            stopAutoPlay();
+          }
+        }
+      }, turboMode ? 350 : 850);
+    }
+
+    function closeWinModal() {
+      document.getElementById('winModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
