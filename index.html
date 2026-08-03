@@ -898,7 +898,7 @@
 
           <div class="form-group-pix">
             <label>Código End-to-End (E2E) do Comprovante</label>
-            <input type="text" id="e2eInput" class="modal-input" placeholder="Ex: E123456782026... (32 caracteres)" style="margin-bottom: 12px; font-size: 0.95rem; text-align: left; padding: 10px;">
+            <input type="text" id="e2eInput" class="modal-input" placeholder="Informe o código do comprovante..." style="margin-bottom: 12px; font-size: 0.95rem; text-align: left; padding: 10px;">
           </div>
 
           <div class="form-group-pix">
@@ -1175,21 +1175,7 @@
       window.location.reload();
     }
 
-    // --- LÓGICA DE DETECÇÃO E VALIDAÇÃO DE CÓDIGO E2E PIX ---
-
-    function isE2EVeridico(e2eId) {
-      if (!e2eId || typeof e2eId !== 'string') return false;
-      const clean = e2eId.trim().toUpperCase();
-
-      // Estrutura Bacen: 'E' + 8 dígitos ISPB + 12 dígitos Data/Hora + 11 caracteres Alfanuméricos (32 caracteres)
-      const regexPixE2E = /^E\d{8}\d{12}[A-Z0-9]{11}$/;
-      if (!regexPixE2E.test(clean)) return false;
-
-      const ano = parseInt(clean.substring(9, 13));
-      if (ano < 2020 || ano > 2030) return false;
-
-      return true;
-    }
+    // --- CONTROLE DE DUPLICIDADE DE CÓDIGO E2E PIX ---
 
     function getUsedE2ECodes() {
       const data = localStorage.getItem('e2e_codigos_usados');
@@ -1252,14 +1238,7 @@
         return;
       }
 
-      // 1. Checa se o código é verídico (Estrutura do Banco Central)
-      if (!isE2EVeridico(e2eVal)) {
-        alertError.style.display = 'block';
-        alertError.innerHTML = 'Código não verídico. Informe um código E2E válido do Pix (ex: E123456782026...).';
-        return;
-      }
-
-      // 2. Checa se o código já foi utilizado
+      // Checa APENAS se o código já foi utilizado
       const usedCodes = getUsedE2ECodes();
       if (usedCodes.includes(e2eVal)) {
         alertError.style.display = 'block';
@@ -1267,7 +1246,7 @@
         return;
       }
 
-      // 3. Sucesso: Registrar como usado e adicionar saldo
+      // Sucesso: Registrar como usado e adicionar saldo
       saveUsedE2ECode(e2eVal);
       currentBalance += amountVal;
       updateBalanceUI();
