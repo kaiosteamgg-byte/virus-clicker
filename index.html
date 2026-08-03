@@ -689,7 +689,7 @@
     <div class="header-right">
       <div class="wallet-box">
         <i data-lucide="wallet" style="width: 18px;"></i>
-        <span id="wallet-balance">R$ 1.250,00</span>
+        <span id="wallet-balance">R$ 0,00</span>
       </div>
       <button class="btn-deposit" onclick="openWalletModal()">
         <i data-lucide="wallet-cards" style="width: 18px;"></i> Gerenciar Saldo
@@ -1031,7 +1031,7 @@
     // --- SALDO E DADOS DO USUÁRIO ---
     let currentBalance = parseFloat(localStorage.getItem('user_balance'));
     if (isNaN(currentBalance)) {
-      currentBalance = 1250.00;
+      currentBalance = 0.00;
       localStorage.setItem('user_balance', currentBalance);
     }
 
@@ -1138,7 +1138,7 @@
       users.push(newUser);
       localStorage.setItem('willbet_users', JSON.stringify(users));
       localStorage.setItem('currentUser', JSON.stringify(newUser));
-      localStorage.setItem('user_balance', '1250.00');
+      localStorage.setItem('user_balance', '0.00');
       localStorage.setItem('isLoggedIn', 'true');
 
       alert('Cadastro realizado com sucesso!');
@@ -1161,7 +1161,7 @@
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('isLoggedIn', 'true');
         if (!localStorage.getItem('user_balance')) {
-          localStorage.setItem('user_balance', '1250.00');
+          localStorage.setItem('user_balance', '0.00');
         }
         window.location.reload();
       } else {
@@ -1310,7 +1310,7 @@
       }
     }
 
-    // --- LÓGICA DE SAQUE COM STATUS DE 3 DIAS ---
+    // --- LÓGICA DE SAQUE COM STATUS TEMPORAL DE 3 DIAS ---
     function getWithdrawalStatus(createdAt) {
       const now = Date.now();
       const diffHours = (now - createdAt) / (1000 * 60 * 60);
