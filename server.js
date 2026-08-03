@@ -1,12 +1,24 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
+const path = require('path'); // <-- Adicionado para gerenciar caminhos de arquivos
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Conexão com o Banco de Dados SQLite (arquivo local willbet.db)
+// ==========================================
+// SERVIR OS ARQUIVOS HTML, CSS, JS E ASSETS
+// ==========================================
+app.use(express.static(__dirname)); // Permite acessar index.html, fortune-tiger.html, etc.
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ==========================================
+// BANCO DE DADOS SQLITE
+// ==========================================
 const db = new sqlite3.Database('./willbet.db', (err) => {
     if (err) {
         console.error('Erro ao conectar ao banco de dados:', err.message);
@@ -26,7 +38,9 @@ db.run(`CREATE TABLE IF NOT EXISTS pix_transactions (
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
 
-// Rota para processar o depósito e salvar no banco
+// ==========================================
+// ROTAS DA API
+// ==========================================
 app.post('/api/deposit', (req, res) => {
     const { e2e, cpf, nome, valor } = req.body;
 
@@ -70,7 +84,7 @@ app.get('/ping', (req, res) => {
     res.status(200).send('Estou vivo!');
 });
 
-// Inicializar servidor (Compatível com a porta local e com a nuvem)
+// Inicializar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor da WillBet rodando na porta ${PORT}`);
